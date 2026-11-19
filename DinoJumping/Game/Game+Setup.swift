@@ -12,10 +12,12 @@ extension DinoGameScene {
         sky.zPosition = -10
         addChild(sky)
 
-        if showStars {
-            addStars()
-        }
+        // Bintang sedang dimatikan karena showStars = false.
+        // if showStars {
+        //     addStars()
+        // }
 
+        // Ground tetap dibuat agar physics player tetap memiliki lantai.
         addGround()
     }
 
@@ -82,7 +84,7 @@ extension DinoGameScene {
         bestLabel.zPosition = 10
         addChild(bestLabel)
 
-        updateScoreLabels()
+        // updateScoreLabels() // HUD sedang dimatikan.
     }
 
     // MARK: - Player
@@ -93,38 +95,17 @@ extension DinoGameScene {
         player.position = CGPoint(x: 125, y: groundY + 36)
         player.zPosition = 5
 
-        let body = SKShapeNode(rectOf: CGSize(width: 42, height: 48), cornerRadius: 10)
-        body.fillColor = dinoColor
-        body.strokeColor = .clear
-        body.position = CGPoint(x: 0, y: 4)
-        player.addChild(body)
-
-        let head = SKShapeNode(rectOf: CGSize(width: 34, height: 31), cornerRadius: 9)
-        head.fillColor = dinoColor
-        head.strokeColor = .clear
-        head.position = CGPoint(x: 18, y: 23)
-        player.addChild(head)
-
-        let eye = SKShapeNode(circleOfRadius: 3)
-        eye.fillColor = groundColor
-        eye.strokeColor = .clear
-        eye.position = CGPoint(x: 27, y: 29)
-        player.addChild(eye)
-
-        let tail = SKShapeNode(rectOf: CGSize(width: 15, height: 8), cornerRadius: 3)
-        tail.fillColor = dinoColor
-        tail.strokeColor = .clear
-        tail.position = CGPoint(x: -27, y: 10)
-        tail.zRotation = -0.35
-        player.addChild(tail)
-
-        addPlayerFoot(at: CGPoint(x: -11, y: -22))
-        addPlayerFoot(at: CGPoint(x: 14, y: -22))
+        dinoSprite.texture = dinoTexture(frame: 0)
+        dinoSprite.size = CGSize(width: 70, height: 70)
+        dinoSprite.texture?.filteringMode = .nearest
+        dinoSprite.position = CGPoint(x: 0, y: 4)
+        player.addChild(dinoSprite)
 
         player.physicsBody = SKPhysicsBody(
             rectangleOf: CGSize(width: 38, height: 72),
             center: CGPoint(x: 5, y: 0)
         )
+        // Player belum dipengaruhi gravity sebelum tombol mulai ditekan.
         player.physicsBody?.isDynamic = false
         player.physicsBody?.allowsRotation = false
         player.physicsBody?.restitution = 0
@@ -136,11 +117,18 @@ extension DinoGameScene {
         addChild(player)
     }
 
-    func addPlayerFoot(at position: CGPoint) {
-        let foot = SKShapeNode(rectOf: CGSize(width: 12, height: 7), cornerRadius: 2)
-        foot.fillColor = dinoColor
-        foot.strokeColor = .clear
-        foot.position = position
-        player.addChild(foot)
+    func dinoTexture(frame: Int) -> SKTexture {
+        let spriteSheet = SKTexture(imageNamed: "dino")
+        spriteSheet.filteringMode = .nearest
+
+        let frameWidth = 1.0 / 8.0
+        let frameRect = CGRect(
+            x: CGFloat(frame) * frameWidth,
+            y: 0,
+            width: frameWidth,
+            height: 1
+        )
+
+        return SKTexture(rect: frameRect, in: spriteSheet)
     }
 }

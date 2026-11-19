@@ -18,17 +18,19 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
 
     let groundHeight: CGFloat = 100
     let gravity: CGFloat = -1_850
-    let jumpPower: CGFloat = 720
-    let initialSpeed: CGFloat = 310
+    let jumpPower: CGFloat = 120
+    let initialSpeed: CGFloat = 110
+    let playerRunDuration: TimeInterval = 5.12
 
-    // Ubah true/false untuk mempelajari tiap bagian visual game.
+    // Semua toggle saat ini aktif.
+    // Ubah menjadi false untuk menyembunyikan bagian tertentu saat belajar.
     var showBackground = true
-    var showStars = true
+    var showStars = false
     var showGround = true
-    var showHUD = true
+    var showHUD = false
     var showPlayer = true
-    var showObstacles = true
-    var showOverlay = true
+    var showObstacles = false
+    var showOverlay = false
 
     let backgroundColorValue = SKColor(red: 0.15, green: 0.09, blue: 0.35, alpha: 1)
     let groundColor = SKColor(red: 0.09, green: 0.05, blue: 0.22, alpha: 1)
@@ -39,6 +41,7 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
     // MARK: - Scene objects
 
     let player = SKNode()
+    let dinoSprite = SKSpriteNode()
     let scoreLabel = SKLabelNode(fontNamed: "AvenirNext-Bold")
     let bestLabel = SKLabelNode(fontNamed: "AvenirNext-Bold")
     let overlay = SKNode()
@@ -51,7 +54,7 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
     var elapsedTime: TimeInterval = 0
     var lastUpdateTime: TimeInterval = 0
     var obstacleTimer: TimeInterval = 0
-    var gameSpeed: CGFloat = 310
+    var gameSpeed: CGFloat = 110
 
     var groundY: CGFloat {
         groundHeight
@@ -66,15 +69,22 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
         physicsWorld.contactDelegate = self
 
         createBackground()
-        createHUD()
+
+        // HUD sedang dimatikan karena showHUD = false.
+        // createHUD()
+
         createPlayer()
-        showOverlay(
-            title: "DINO DASH",
-            message: "Gunakan tombol di bawah untuk mulai dan melompat."
-        )
+        startIdleAnimation()
+
+        // Overlay sedang dimatikan karena showOverlay = false.
+        // showOverlay(
+        //     title: "DINO JUMPING",
+        //     message: "Gunakan tombol di bawah untuk mulai dan melompat."
+        // )
     }
 
     override func update(_ currentTime: TimeInterval) {
+        // Saat ready atau gameOver, game loop sengaja berhenti.
         guard state == .playing else { return }
 
         let deltaTime = getDeltaTime(currentTime)
@@ -82,8 +92,10 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
         obstacleTimer += deltaTime
 
         updateScore()
-        moveObstacles(deltaTime)
-        createObstacleWhenNeeded()
+
+        // Rintangan sedang dimatikan karena showObstacles = false.
+        // moveObstacles(deltaTime)
+        // createObstacleWhenNeeded()
     }
 
     // MARK: - Input and physics

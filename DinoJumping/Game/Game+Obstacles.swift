@@ -1,6 +1,9 @@
 import SpriteKit
 
 extension DinoGameScene {
+    // Rintangan sedang tidak dipakai karena showObstacles = false di Game.swift.
+    // Fungsi-fungsi di file ini tetap disimpan agar mudah diaktifkan kembali.
+
     // MARK: - Game loop helpers
 
     func getDeltaTime(_ currentTime: TimeInterval) -> TimeInterval {
@@ -36,6 +39,7 @@ extension DinoGameScene {
     // MARK: - Create obstacles
 
     func createObstacle() {
+        // Saat showObstacles false, rintangan tidak dibuat.
         guard showObstacles else { return }
 
         let isBird = Int.random(in: 0...4) == 0

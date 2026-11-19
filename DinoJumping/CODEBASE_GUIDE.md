@@ -122,6 +122,14 @@ Mengatur aksi permainan:
 
 Player diam sebelum mulai karena physics-nya nonaktif. Physics diaktifkan oleh `startGame()`.
 
+Saat `startGame()` dipanggil, `startPlayerRunning()` juga menjalankan animasi lari sederhana. Kecepatannya dapat diatur di `Game/Game.swift`:
+
+```swift
+let playerRunDuration: TimeInterval = 0.12
+```
+
+Nilai lebih kecil membuat gerakan lari lebih cepat.
+
 ### Game/Game+Obstacles.swift
 
 Mengatur rintangan:
@@ -219,6 +227,38 @@ Toggle ini dibaca saat scene dibuat. Setelah mengubah nilai, jalankan ulang apli
 | `showObstacles` | Kaktus dan burung | `Game+Obstacles.swift` |
 | `showOverlay` | Panel awal dan game over | `Game+Flow.swift` |
 
+## Code yang sengaja tidak aktif
+
+Saat ini beberapa bagian sengaja dimatikan untuk memudahkan belajar player:
+
+```swift
+showStars = false
+showHUD = false
+showObstacles = false
+showOverlay = false
+```
+
+Pemanggilan code yang tidak aktif sudah diberi komentar langsung di source code:
+
+- Pembuatan bintang dilewati.
+- HUD dilewati.
+- Rintangan tidak bergerak dan tidak dibuat.
+- Overlay awal dan game over dilewati.
+- `update(_:)` berhenti saat state bukan `playing`.
+- Physics player nonaktif sebelum `startGame()`.
+- Idle hanya menampilkan frame pertama, tanpa gerakan.
+- Animasi 8 frame aktif setelah game dimulai.
+
+Untuk mengaktifkan kembali bagian tersebut, ubah nilai toggle menjadi `true` dan hapus komentar pada pemanggilannya jika diperlukan.
+
+Jadi, saat membaca code, bedakan:
+
+```text
+Code mati       → tidak dipakai sama sekali
+Code bersyarat  → hanya berjalan pada kondisi tertentu
+Toggle debug    → dapat diubah true/false untuk belajar
+```
+
 ## Perubahan sederhana
 
 ### Mengubah teks tombol
@@ -249,6 +289,30 @@ Cari:
 
 ```swift
 let initialSpeed: CGFloat = 310
+```
+
+### Sprite player dan animasi idle
+
+Sprite player menggunakan asset:
+
+```text
+Assets.xcassets/dino.imageset/dino.png
+```
+
+Sprite sheet memiliki 8 frame horizontal.
+
+Edit `Game/Game+Setup.swift` untuk melihat cara frame dipotong melalui `dinoTexture(frame:)`.
+
+Animasi player:
+
+- Sebelum mulai: player menampilkan frame pertama secara diam sebagai idle.
+- Saat bermain: 8 frame sprite sheet diputar sebagai animasi lari.
+- Saat game over: animasi lari dihentikan dan frame idle ditampilkan lagi.
+
+Kecepatan animasi lari diatur dari:
+
+```swift
+let playerRunDuration: TimeInterval = 0.12
 ```
 
 ### Mengubah bentuk Dino

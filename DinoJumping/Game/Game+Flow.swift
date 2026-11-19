@@ -18,6 +18,30 @@ extension DinoGameScene {
         body.applyImpulse(CGVector(dx: 0, dy: jumpPower))
     }
 
+    func startIdleAnimation() {
+        // Idle sekarang berupa satu frame diam, tanpa gerakan naik-turun.
+        dinoSprite.removeAllActions()
+        dinoSprite.texture = dinoTexture(frame: 0)
+    }
+
+    func startPlayerRunning() {
+        dinoSprite.removeAction(forKey: "idle")
+
+        // Delapan frame ini hanya berjalan setelah startGame().
+        let frames = (0..<8).map { dinoTexture(frame: $0) }
+        let running = SKAction.repeatForever(
+            SKAction.animate(with: frames, timePerFrame: playerRunDuration)
+        )
+
+        dinoSprite.run(running, withKey: "running")
+    }
+
+    func stopPlayerRunning() {
+        dinoSprite.removeAction(forKey: "running")
+        dinoSprite.texture = dinoTexture(frame: 0)
+        startIdleAnimation()
+    }
+
     func startGame() {
         state = .playing
         score = 0
@@ -32,13 +56,15 @@ extension DinoGameScene {
         player.physicsBody?.isDynamic = true
         player.physicsBody?.velocity = .zero
         player.physicsBody?.isResting = false
-        updateScoreLabels()
+        startPlayerRunning()
+        // updateScoreLabels() // HUD sedang dimatikan.
     }
 
     func endGame() {
         guard state == .playing else { return }
 
         state = .gameOver
+        stopPlayerRunning()
         player.physicsBody?.isDynamic = false
         player.physicsBody?.velocity = .zero
 
@@ -47,16 +73,20 @@ extension DinoGameScene {
             UserDefaults.standard.set(bestScore, forKey: "dinoBestScore")
         }
 
-        updateScoreLabels()
-        showOverlay(
-            title: "GAME OVER",
-            message: "Skor kamu  " + String(format: "%05d", score)
-        )
+        // updateScoreLabels() tidak terlihat saat showHUD = false.
+        // updateScoreLabels()
+
+        // Overlay sedang dimatikan karena showOverlay = false.
+        // showOverlay(
+        //     title: "GAME OVER",
+        //     message: "Skor kamu  " + String(format: "%05d", score)
+        // )
     }
 
     // MARK: - Overlay
 
     func showOverlay(title: String, message: String) {
+        // Overlay dapat dimatikan dari toggle debug.
         guard showOverlay else { return }
 
         overlay.removeFromParent()
@@ -108,7 +138,7 @@ extension DinoGameScene {
     func updateScore() {
         score = Int(elapsedTime * 10)
         gameSpeed = min(650, initialSpeed + CGFloat(score) * 0.7)
-        updateScoreLabels()
+        // updateScoreLabels() // HUD sedang dimatikan.
     }
 
     func updateScoreLabels() {
