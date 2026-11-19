@@ -38,10 +38,10 @@ extension DinoGameScene {
     func createObstacle() {
         guard showObstacles else { return }
 
-        let isBird = Int.random(in: 0...4) == 0
+        let isUFO = Int.random(in: 0...4) == 0
 
-        if isBird {
-            createBird()
+        if isUFO {
+            createUFO()
         } else {
             createPalmTree()
         }
@@ -92,26 +92,36 @@ extension DinoGameScene {
         )
     }
 
-    func createBird() {
+    func createUFO() {
         let obstacle = SKNode()
         obstacle.name = "obstacle"
         obstacle.position = CGPoint(x: size.width + 50, y: groundY + 70)
 
-        let bird = SKShapeNode(ellipseOf: CGSize(width: 40, height: 20))
-        bird.fillColor = obstacleColor
-        bird.strokeColor = .clear
-        obstacle.addChild(bird)
+        let bodyColor = SKColor(red: 0.65, green: 0.70, blue: 0.78, alpha: 1)
+        let lightColor = SKColor(red: 0.30, green: 0.90, blue: 1.0, alpha: 1)
 
-        let wing = SKShapeNode(rectOf: CGSize(width: 24, height: 7), cornerRadius: 3)
-        wing.fillColor = obstacleColor
-        wing.strokeColor = .clear
-        wing.position = CGPoint(x: -12, y: 10)
-        wing.zRotation = -0.5
-        obstacle.addChild(wing)
+        let body = SKShapeNode(ellipseOf: CGSize(width: 52, height: 20))
+        body.fillColor = bodyColor
+        body.strokeColor = .clear
+        obstacle.addChild(body)
+
+        let dome = SKShapeNode(ellipseOf: CGSize(width: 24, height: 18))
+        dome.fillColor = lightColor
+        dome.strokeColor = .clear
+        dome.position = CGPoint(x: 0, y: 8)
+        obstacle.addChild(dome)
+
+        for x in [-18, 0, 18] {
+            let light = SKShapeNode(circleOfRadius: 3)
+            light.fillColor = accentColor
+            light.strokeColor = .clear
+            light.position = CGPoint(x: x, y: -7)
+            obstacle.addChild(light)
+        }
 
         addObstaclePhysics(
             to: obstacle,
-            size: CGSize(width: 42, height: 22)
+            size: CGSize(width: 52, height: 24)
         )
     }
 
