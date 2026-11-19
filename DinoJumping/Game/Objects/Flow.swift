@@ -48,11 +48,12 @@ extension DinoGameScene {
 
         // updateScoreLabels() // HUD sedang dimatikan.
 
-        // Overlay sedang dimatikan karena showOverlay = false.
-        // showOverlay(
-        //     title: "GAME OVER",
-        //     message: "Skor kamu  " + String(format: "%05d", score)
-        // )
+        if showOverlay {
+            showOverlay(
+                title: "GAME OVER",
+                message: "Skor kamu  " + String(format: "%05d", score)
+            )
+        }
     }
 
     // MARK: - Score

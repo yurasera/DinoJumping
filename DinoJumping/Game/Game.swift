@@ -20,7 +20,7 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
     let gravity: CGFloat = -1_850
     let jumpPower: CGFloat = 520
     let initialSpeed: CGFloat = 10
-    let playerRunDuration: TimeInterval = 5.12
+    let playerRunDuration: TimeInterval = 0.12
 
     // Ubah true/false untuk mempelajari tiap bagian visual game.
     var showBackground = true
@@ -71,16 +71,15 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
         createBackground()
 
         // HUD sedang dimatikan karena showHUD = false.
-        // createHUD()
+         createHUD()
 
         createPlayer()
         startIdleAnimation()
 
-        // Overlay sedang dimatikan karena showOverlay = false.
-         showOverlay(
-             title: "DINO JUMPING",
-             message: "Gunakan tombol di bawah untuk mulai dan melompat."
-         )
+        showOverlay(
+            title: "DINO JUMPING",
+            message: "Gunakan tombol di bawah untuk mulai dan melompat."
+        )
     }
 
     override func update(_ currentTime: TimeInterval) {
@@ -93,14 +92,23 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
 
         updateScore()
 
-        // Rintangan sedang dimatikan karena showObstacles = false.
-         moveObstacles(deltaTime)
-         createObstacleWhenNeeded()
+        moveObstacles(deltaTime)
+        createObstacleWhenNeeded()
     }
 
     // MARK: - Input and physics
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        guard let touch = touches.first else { return }
+        let location = touch.location(in: self)
+
+        // Saat game over, sentuhan pada tombol akan memulai ulang game.
+        if state == .gameOver,
+           nodes(at: location).contains(where: { $0.name == "restartButton" }) {
+            startGame()
+            return
+        }
+
         jump()
     }
 

@@ -4,7 +4,6 @@ extension DinoGameScene {
     // MARK: - Overlay
 
     func showOverlay(title: String, message: String) {
-        // Overlay sedang dimatikan karena showOverlay = false.
         guard showOverlay else { return }
 
         overlay.removeFromParent()
@@ -32,6 +31,33 @@ extension DinoGameScene {
             color: .white,
             y: size.height * 0.51
         )
+
+        // Tombol hanya muncul saat game over.
+        if title == "GAME OVER" {
+            let restartButton = SKShapeNode(
+                rectOf: CGSize(width: 180, height: 44),
+                cornerRadius: 12
+            )
+            restartButton.name = "restartButton"
+            restartButton.fillColor = accentColor
+            restartButton.strokeColor = .clear
+            restartButton.position = CGPoint(x: size.width / 2, y: size.height * 0.43)
+            overlay.addChild(restartButton)
+
+            let restartLabel = SKLabelNode(fontNamed: "AvenirNext-Bold")
+            restartLabel.name = "restartButton"
+            restartLabel.text = "RESTART"
+            restartLabel.fontSize = 17
+            restartLabel.fontColor = SKColor(
+                red: 0.10,
+                green: 0.06,
+                blue: 0.22,
+                alpha: 1
+            )
+            restartLabel.verticalAlignmentMode = .center
+            restartLabel.position = .zero
+            restartButton.addChild(restartLabel)
+        }
 
         addChild(overlay)
     }
