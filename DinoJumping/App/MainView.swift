@@ -21,6 +21,7 @@ struct ContentView: View {
                         .foregroundStyle(Color(red: 0.10, green: 0.06, blue: 0.22))
                         .background(Color(red: 1.0, green: 0.82, blue: 0.25))
                         .clipShape(RoundedRectangle(cornerRadius: 14))
+                        .padding(.top, 70)
                 }
                 .accessibilityLabel("Mulai game")
             }

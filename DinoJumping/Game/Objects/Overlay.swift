@@ -12,7 +12,7 @@ extension DinoGameScene {
         overlay.zPosition = 20
 
         let panel = SKShapeNode(
-            rectOf: CGSize(width: 360, height: 150),
+            rectOf: CGSize(width: 460, height: 240),
             cornerRadius: 18
         )
         panel.fillColor = SKColor(red: 0.16, green: 0.10, blue: 0.33, alpha: 0.97)

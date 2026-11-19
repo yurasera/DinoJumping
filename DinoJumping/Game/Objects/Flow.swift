@@ -24,7 +24,7 @@ extension DinoGameScene {
 
         removeObstacles()
         overlay.removeFromParent()
-        player.position = CGPoint(x: 125, y: groundY + 36)
+        player.position = CGPoint(x: 125, y: groundY + 136)
         player.physicsBody?.isDynamic = true
         player.physicsBody?.velocity = .zero
         player.physicsBody?.isResting = false

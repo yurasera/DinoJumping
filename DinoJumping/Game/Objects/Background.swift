@@ -15,9 +15,9 @@ extension DinoGameScene {
         addChild(sky)
 
         // Bintang sedang dimatikan karena showStars = false.
-        // if showStars {
-        //     addStars()
-        // }
+         if showStars {
+             addStars()
+         }
 
         // Tanah dibuat dari y = 0, yaitu bagian paling bawah scene.
         addGround()

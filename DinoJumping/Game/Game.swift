@@ -16,20 +16,20 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
         static let ground: UInt32 = 4
     }
 
-    let groundHeight: CGFloat = 100
+    let groundHeight: CGFloat = 50
     let gravity: CGFloat = -1_850
-    let jumpPower: CGFloat = 120
-    let initialSpeed: CGFloat = 110
+    let jumpPower: CGFloat = 520
+    let initialSpeed: CGFloat = 10
     let playerRunDuration: TimeInterval = 5.12
 
     // Ubah true/false untuk mempelajari tiap bagian visual game.
     var showBackground = true
-    var showStars = false
+    var showStars = true
     var showGround = true
     var showHUD = false
     var showPlayer = true
-    var showObstacles = false
-    var showOverlay = false
+    var showObstacles = true
+    var showOverlay = true
 
     let backgroundColorValue = SKColor(red: 0.15, green: 0.09, blue: 0.35, alpha: 1)
     let groundColor = SKColor(red: 0.09, green: 0.05, blue: 0.22, alpha: 1)
@@ -77,10 +77,10 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
         startIdleAnimation()
 
         // Overlay sedang dimatikan karena showOverlay = false.
-        // showOverlay(
-        //     title: "DINO JUMPING",
-        //     message: "Gunakan tombol di bawah untuk mulai dan melompat."
-        // )
+         showOverlay(
+             title: "DINO JUMPING",
+             message: "Gunakan tombol di bawah untuk mulai dan melompat."
+         )
     }
 
     override func update(_ currentTime: TimeInterval) {
@@ -94,8 +94,8 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
         updateScore()
 
         // Rintangan sedang dimatikan karena showObstacles = false.
-        // moveObstacles(deltaTime)
-        // createObstacleWhenNeeded()
+         moveObstacles(deltaTime)
+         createObstacleWhenNeeded()
     }
 
     // MARK: - Input and physics

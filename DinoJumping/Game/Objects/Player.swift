@@ -12,18 +12,27 @@ extension DinoGameScene {
         dinoSprite.texture = dinoTexture(frame: 0)
         dinoSprite.size = CGSize(width: 70, height: 70)
         dinoSprite.texture?.filteringMode = .nearest
-        dinoSprite.position = CGPoint(x: 0, y: 4)
+        dinoSprite.position = CGPoint(x: 0, y: 100)
         player.addChild(dinoSprite)
 
         player.physicsBody = SKPhysicsBody(
             rectangleOf: CGSize(width: 38, height: 72),
             center: CGPoint(x: 5, y: 0)
         )
-        // Player belum dipengaruhi gravity sebelum tombol mulai ditekan.
+
+        // Gravity scene berasal dari Game.swift.
+        // isDynamic harus true agar player bisa jatuh dan melompat.
+        // Nilai ini dibuat false dulu sebelum tombol MULAI ditekan.
         player.physicsBody?.isDynamic = false
+        player.physicsBody?.affectedByGravity = true
         player.physicsBody?.allowsRotation = false
+
+        // Player berhenti saat menyentuh tanah dan tidak memantul.
         player.physicsBody?.restitution = 0
         player.physicsBody?.friction = 0
+        player.physicsBody?.usesPreciseCollisionDetection = true
+
+        // Player hanya bertabrakan dengan tanah.
         player.physicsBody?.categoryBitMask = Category.player
         player.physicsBody?.collisionBitMask = Category.ground
         player.physicsBody?.contactTestBitMask = Category.obstacle
