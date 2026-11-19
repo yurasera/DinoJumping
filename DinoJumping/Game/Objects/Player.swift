@@ -6,8 +6,6 @@ extension DinoGameScene {
     func createPlayer() {
         player.name = "player"
         player.isHidden = !showPlayer
-
-        // Player mulai tepat di atas tanah.
         player.position = CGPoint(x: 125, y: groundY + 35)
         player.zPosition = 5
 
@@ -39,19 +37,36 @@ extension DinoGameScene {
 
     func jumpPlayer() {
         guard state == .playing,
-              let body = player.physicsBody else {
+              let body = player.physicsBody,
+              player.action(forKey: "jump") == nil else {
             return
         }
 
-        // Player hanya bisa loncat jika sedang menyentuh tanah.
-        let groundPosition = groundY + 35
-        let isOnGround = abs(player.position.y - groundPosition) < 5
+        // Physics dihentikan sementara agar gerakan jump terlihat jelas.
+        body.isDynamic = false
 
-        guard isOnGround else { return }
+        let moveUp = SKAction.moveBy(
+            x: 0,
+            y: 120,
+            duration: 0.3
+        )
+        let moveDown = SKAction.moveBy(
+            x: 0,
+            y: -120,
+            duration: 0.3
+        )
+        let finishJump = SKAction.run { [weak self] in
+            guard let self else { return }
 
-        // Mengatur velocity langsung membuat lompatan lebih konsisten.
-        body.velocity = CGVector(dx: body.velocity.dx, dy: jumpPower)
-        body.isResting = false
+            // Player kembali tepat di atas tanah setelah mendarat.
+            self.player.position.y = self.groundY + 35
+            body.velocity = .zero
+            body.isDynamic = true
+            body.affectedByGravity = true
+        }
+        let jump = SKAction.sequence([moveUp, moveDown, finishJump])
+
+        player.run(jump, withKey: "jump")
     }
 
     func dinoTexture(frame: Int) -> SKTexture {

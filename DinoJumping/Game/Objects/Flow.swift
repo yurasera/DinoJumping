@@ -16,6 +16,7 @@ extension DinoGameScene {
         gameSpeed = initialSpeed
 
         removeObstacles()
+        player.removeAction(forKey: "jump")
         overlay.removeFromParent()
         player.position = CGPoint(x: 125, y: groundY + 35)
         player.physicsBody?.isDynamic = true
@@ -30,6 +31,7 @@ extension DinoGameScene {
         guard state == .playing else { return }
 
         state = .gameOver
+        player.removeAction(forKey: "jump")
         stopPlayerRunning()
         player.physicsBody?.isDynamic = false
         player.physicsBody?.velocity = .zero

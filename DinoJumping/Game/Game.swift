@@ -18,7 +18,7 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
 
     let groundHeight: CGFloat = 50
     let gravity: CGFloat = -1_850
-    let jumpPower: CGFloat = 520
+    let jumpPower: CGFloat = 700
     let initialSpeed: CGFloat = 300
     let playerRunDuration: TimeInterval = 0.12
 
@@ -69,9 +69,7 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
         physicsWorld.contactDelegate = self
 
         createBackground()
-
         createHUD()
-
         createPlayer()
         startIdleAnimation()
 
