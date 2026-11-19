@@ -24,7 +24,7 @@ extension DinoGameScene {
         player.physicsBody?.isResting = false
         startPlayerRunning()
 
-        // updateScoreLabels() // HUD sedang dimatikan.
+         updateScoreLabels() // HUD sedang dimatikan.
     }
 
     func endGame() {
@@ -41,7 +41,7 @@ extension DinoGameScene {
             UserDefaults.standard.set(bestScore, forKey: "dinoBestScore")
         }
 
-        // updateScoreLabels() // HUD sedang dimatikan.
+         updateScoreLabels() // HUD sedang dimatikan.
 
         if showOverlay {
             showOverlay(
@@ -57,6 +57,6 @@ extension DinoGameScene {
         score = Int(elapsedTime * 10)
         gameSpeed = min(650, initialSpeed + CGFloat(score) * 0.7)
 
-        // updateScoreLabels() // HUD sedang dimatikan.
+         updateScoreLabels() // HUD sedang dimatikan.
     }
 }
