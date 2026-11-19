@@ -4,7 +4,9 @@ extension DinoGameScene {
     // MARK: - Background
 
     func createBackground() {
-        let sky = SKShapeNode(rectOf: CGSize(width: size.width, height: size.height))
+        // size adalah ukuran scene yang sedang tampil di layar.
+        // Dengan resizeFill, nilainya mengikuti ukuran SpriteView.
+        let sky = SKShapeNode(rectOf: size)
         sky.fillColor = backgroundColorValue
         sky.strokeColor = .clear
         sky.isHidden = !showBackground
@@ -17,7 +19,7 @@ extension DinoGameScene {
         //     addStars()
         // }
 
-        // Ground tetap dibuat agar physics player tetap memiliki lantai.
+        // Tanah dibuat dari y = 0, yaitu bagian paling bawah scene.
         addGround()
     }
 
@@ -36,16 +38,21 @@ extension DinoGameScene {
     }
 
     func addGround() {
+        // SpriteKit memakai titik (0, 0) di kiri bawah scene.
         let ground = SKShapeNode(
             rectOf: CGSize(width: size.width, height: groundHeight)
         )
         ground.fillColor = groundColor
         ground.strokeColor = .clear
         ground.isHidden = !showGround
-        ground.position = CGPoint(x: size.width / 2, y: groundHeight / 2)
+        ground.position = CGPoint(
+            x: size.width / 2,
+            y: groundHeight / 2
+        )
         ground.zPosition = -8
         addChild(ground)
 
+        // Garis atas tanah berada di y = groundY.
         let groundLine = SKShapeNode(rectOf: CGSize(width: size.width, height: 4))
         groundLine.fillColor = SKColor(red: 0.54, green: 0.46, blue: 0.97, alpha: 1)
         groundLine.strokeColor = .clear
@@ -54,6 +61,7 @@ extension DinoGameScene {
         groundLine.zPosition = -7
         addChild(groundLine)
 
+        // Physics body membuat player bisa berdiri di atas tanah.
         let groundBody = SKNode()
         groundBody.position = CGPoint(x: size.width / 2, y: groundY - 4)
         groundBody.physicsBody = SKPhysicsBody(

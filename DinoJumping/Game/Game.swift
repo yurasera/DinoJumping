@@ -22,8 +22,7 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
     let initialSpeed: CGFloat = 110
     let playerRunDuration: TimeInterval = 5.12
 
-    // Semua toggle saat ini aktif.
-    // Ubah menjadi false untuk menyembunyikan bagian tertentu saat belajar.
+    // Ubah true/false untuk mempelajari tiap bagian visual game.
     var showBackground = true
     var showStars = false
     var showGround = true
@@ -63,7 +62,8 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
     // MARK: - Scene lifecycle
 
     override func didMove(to view: SKView) {
-        scaleMode = .aspectFit
+        // Scene mengikuti ukuran SpriteView agar background memenuhi area game.
+        scaleMode = .resizeFill
         backgroundColor = backgroundColorValue
         physicsWorld.gravity = CGVector(dx: 0, dy: gravity)
         physicsWorld.contactDelegate = self

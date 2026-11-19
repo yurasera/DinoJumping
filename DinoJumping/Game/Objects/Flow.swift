@@ -4,11 +4,7 @@ extension DinoGameScene {
     // MARK: - Start and jump
 
     func jump() {
-        if state == .ready || state == .gameOver {
-            startGame()
-            return
-        }
-
+        // Tombol loncat hanya bekerja setelah game dimulai.
         guard state == .playing,
               let body = player.physicsBody,
               abs(body.velocity.dy) < 40 else {
