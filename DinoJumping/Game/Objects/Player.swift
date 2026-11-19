@@ -6,17 +6,17 @@ extension DinoGameScene {
     func createPlayer() {
         player.name = "player"
         player.isHidden = !showPlayer
-        player.position = CGPoint(x: 125, y: groundY + 36)
+        player.position = CGPoint(x: 125, y: groundY + 50)
         player.zPosition = 5
 
         dinoSprite.texture = dinoTexture(frame: 0)
         dinoSprite.size = CGSize(width: 70, height: 70)
         dinoSprite.texture?.filteringMode = .nearest
-        dinoSprite.position = CGPoint(x: 0, y: 100)
+        dinoSprite.position = CGPoint(x: 0, y: 0)
         player.addChild(dinoSprite)
 
         player.physicsBody = SKPhysicsBody(
-            rectangleOf: CGSize(width: 38, height: 72),
+            rectangleOf: CGSize(width: 38, height: 70),
             center: CGPoint(x: 5, y: 0)
         )
 
