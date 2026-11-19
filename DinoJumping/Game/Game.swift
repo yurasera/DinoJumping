@@ -19,7 +19,7 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
     let groundHeight: CGFloat = 50
     let gravity: CGFloat = -1_850
     let jumpPower: CGFloat = 520
-    let initialSpeed: CGFloat = 10
+    let initialSpeed: CGFloat = 300
     let playerRunDuration: TimeInterval = 0.12
 
     // Ubah true/false untuk mempelajari tiap bagian visual game.
@@ -53,7 +53,7 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
     var elapsedTime: TimeInterval = 0
     var lastUpdateTime: TimeInterval = 0
     var obstacleTimer: TimeInterval = 0
-    var gameSpeed: CGFloat = 800
+    var gameSpeed: CGFloat = 300
 
     var groundY: CGFloat {
         groundHeight
@@ -70,7 +70,6 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
 
         createBackground()
 
-        // HUD sedang dimatikan karena showHUD = false.
         createHUD()
 
         createPlayer()
@@ -91,7 +90,6 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
         obstacleTimer += deltaTime
 
         updateScore()
-
         moveObstacles(deltaTime)
         createObstacleWhenNeeded()
     }

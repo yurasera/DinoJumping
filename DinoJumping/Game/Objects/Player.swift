@@ -6,7 +6,9 @@ extension DinoGameScene {
     func createPlayer() {
         player.name = "player"
         player.isHidden = !showPlayer
-        player.position = CGPoint(x: 125, y: groundY + 50)
+
+        // Player mulai tepat di atas tanah.
+        player.position = CGPoint(x: 125, y: groundY + 35)
         player.zPosition = 5
 
         dinoSprite.texture = dinoTexture(frame: 0)
@@ -20,24 +22,36 @@ extension DinoGameScene {
             center: CGPoint(x: 5, y: 0)
         )
 
-        // Gravity scene berasal dari Game.swift.
-        // isDynamic harus true agar player bisa jatuh dan melompat.
-        // Nilai ini dibuat false dulu sebelum tombol MULAI ditekan.
+        // Sebelum tombol MULAI ditekan, player belum ikut physics.
         player.physicsBody?.isDynamic = false
         player.physicsBody?.affectedByGravity = true
         player.physicsBody?.allowsRotation = false
-
-        // Player berhenti saat menyentuh tanah dan tidak memantul.
         player.physicsBody?.restitution = 0
         player.physicsBody?.friction = 0
         player.physicsBody?.usesPreciseCollisionDetection = true
 
-        // Player hanya bertabrakan dengan tanah.
         player.physicsBody?.categoryBitMask = Category.player
         player.physicsBody?.collisionBitMask = Category.ground
         player.physicsBody?.contactTestBitMask = Category.obstacle
 
         addChild(player)
+    }
+
+    func jumpPlayer() {
+        guard state == .playing,
+              let body = player.physicsBody else {
+            return
+        }
+
+        // Player hanya bisa loncat jika sedang menyentuh tanah.
+        let groundPosition = groundY + 35
+        let isOnGround = abs(player.position.y - groundPosition) < 5
+
+        guard isOnGround else { return }
+
+        // Mengatur velocity langsung membuat lompatan lebih konsisten.
+        body.velocity = CGVector(dx: body.velocity.dx, dy: jumpPower)
+        body.isResting = false
     }
 
     func dinoTexture(frame: Int) -> SKTexture {

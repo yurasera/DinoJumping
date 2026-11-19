@@ -4,14 +4,7 @@ extension DinoGameScene {
     // MARK: - Start and jump
 
     func jump() {
-        // Tombol loncat hanya bekerja setelah game dimulai.
-        guard state == .playing,
-              let body = player.physicsBody,
-              abs(body.velocity.dy) < 40 else {
-            return
-        }
-
-        body.applyImpulse(CGVector(dx: 0, dy: jumpPower))
+        jumpPlayer()
     }
 
     func startGame() {
@@ -24,13 +17,13 @@ extension DinoGameScene {
 
         removeObstacles()
         overlay.removeFromParent()
-        player.position = CGPoint(x: 125, y: groundY + 136)
+        player.position = CGPoint(x: 125, y: groundY + 35)
         player.physicsBody?.isDynamic = true
         player.physicsBody?.velocity = .zero
         player.physicsBody?.isResting = false
         startPlayerRunning()
 
-         updateScoreLabels() // HUD sedang dimatikan.
+        // updateScoreLabels() // HUD sedang dimatikan.
     }
 
     func endGame() {
@@ -46,7 +39,7 @@ extension DinoGameScene {
             UserDefaults.standard.set(bestScore, forKey: "dinoBestScore")
         }
 
-         updateScoreLabels() // HUD sedang dimatikan.
+        // updateScoreLabels() // HUD sedang dimatikan.
 
         if showOverlay {
             showOverlay(
@@ -62,6 +55,6 @@ extension DinoGameScene {
         score = Int(elapsedTime * 10)
         gameSpeed = min(650, initialSpeed + CGFloat(score) * 0.7)
 
-         updateScoreLabels() // HUD sedang dimatikan.
+        // updateScoreLabels() // HUD sedang dimatikan.
     }
 }
