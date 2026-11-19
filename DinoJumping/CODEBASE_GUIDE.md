@@ -1,23 +1,25 @@
 # Panduan Membaca Codebase DinoJumping
 
-Project ini memakai struktur sederhana berbasis tanggung jawab. MVVM belum diperlukan karena game loop, physics, dan collision dikelola langsung oleh SpriteKit.
+Project ini memakai struktur sederhana. Tidak ada MVVM tambahan karena `SKScene` sudah menjadi tempat yang tepat untuk game loop, physics, collision, dan state game.
 
 ## Struktur folder
 
 ```text
 DinoJumping/
-├── CODEBASE_GUIDE.md
 ├── App/
 │   ├── App.swift
 │   └── MainView.swift
 └── Game/
     ├── Game.swift
-    ├── Game+Setup.swift
-    ├── Game+Flow.swift
-    └── Game+Obstacles.swift
+    ├── Background.swift
+    ├── Player.swift
+    ├── HUD.swift
+    ├── Overlay.swift
+    ├── Flow.swift
+    └── Obstacles.swift
 ```
 
-Nama file dibuat singkat, tetapi nama type `DinoGameScene` tetap dipertahankan agar kode tidak berubah tanpa alasan.
+Setiap file Game memiliki satu tanggung jawab utama.
 
 ## Urutan membaca
 
@@ -25,24 +27,25 @@ Nama file dibuat singkat, tetapi nama type `DinoGameScene` tetap dipertahankan a
 1. App/App.swift
 2. App/MainView.swift
 3. Game/Game.swift
-4. Game/Game+Setup.swift
-5. Game/Game+Flow.swift
-6. Game/Game+Obstacles.swift
+4. Game/Background.swift
+5. Game/Player.swift
+6. Game/Flow.swift
+7. Game/Obstacles.swift
+8. Game/HUD.swift
+9. Game/Overlay.swift
 ```
 
-## 1. Folder App
+## Folder App
 
 ### App/App.swift
 
-Entry point aplikasi.
+Entry point aplikasi. File ini membuka `MainView`.
 
 ```text
 App
   └── WindowGroup
         └── MainView
 ```
-
-File ini membuka `MainView` saat aplikasi dijalankan.
 
 ### App/MainView.swift
 
@@ -56,7 +59,7 @@ MainView
         └── gameScene.jump()
 ```
 
-Satu tombol digunakan untuk tiga kondisi:
+Satu tombol memiliki tiga perilaku:
 
 ```text
 ready    → mulai game
@@ -64,94 +67,183 @@ playing  → lompat
 gameOver → mulai ulang
 ```
 
-## 2. Folder Game
+## Game/Game.swift
 
-### Game/Game.swift
-
-File inti scene. Isinya:
+Ini adalah file utama scene. Isinya hanya pengatur umum:
 
 - State game
 - Physics category
-- Konfigurasi dasar
-- Player dan HUD
+- Konfigurasi game
+- Object utama seperti player, label, dan overlay
 - Lifecycle SpriteKit
 - Game loop
 - Input
 - Collision
 
-Status game:
+### State game
 
-```text
+```swift
 ready → playing → gameOver
   ↑                 │
   └─────────────────┘
        tekan tombol
 ```
 
-Saat scene tampil, `didMove(to:)` menyiapkan background, HUD, player, dan overlay.
+### Lifecycle
 
-Saat game berjalan, `update(_:)` dipanggil berulang kali untuk memperbarui skor dan rintangan.
+`didMove(to:)` dipanggil saat scene tampil. Fungsi ini memanggil fungsi pembuat object dari file lain.
 
-### Game/Game+Setup.swift
+### Game loop
 
-Membuat tampilan game:
-
-| Fungsi | Tugas |
-| --- | --- |
-| `createBackground()` | Membuat background |
-| `addStars()` | Membuat bintang |
-| `addGround()` | Membuat tanah dan physics ground |
-| `createHUD()` | Membuat label skor |
-| `createPlayer()` | Membuat Dino |
-| `addPlayerFoot(at:)` | Membuat kaki Dino |
-
-Gunakan file ini untuk mengubah bentuk Dino, warna, background, atau HUD.
-
-### Game/Game+Flow.swift
-
-Mengatur aksi permainan:
-
-| Fungsi | Tugas |
-| --- | --- |
-| `jump()` | Mulai, lompat, atau mengulang game |
-| `startGame()` | Mereset dan memulai game |
-| `endGame()` | Mengakhiri game setelah collision |
-| `showOverlay(title:message:)` | Menampilkan pesan |
-| `updateScore()` | Menghitung skor dan kecepatan |
-| `updateScoreLabels()` | Memperbarui teks skor |
-
-Player diam sebelum mulai karena physics-nya nonaktif. Physics diaktifkan oleh `startGame()`.
-
-Saat `startGame()` dipanggil, `startPlayerRunning()` juga menjalankan animasi lari sederhana. Kecepatannya dapat diatur di `Game/Game.swift`:
-
-```swift
-let playerRunDuration: TimeInterval = 0.12
-```
-
-Nilai lebih kecil membuat gerakan lari lebih cepat.
-
-### Game/Game+Obstacles.swift
-
-Mengatur rintangan:
+`update(_:)` dipanggil berulang kali oleh SpriteKit.
 
 ```text
 update()
-  └── createObstacleWhenNeeded()
-        └── createObstacle()
-              ├── createCactus()
-              └── createBird()
+  ├── berhenti jika state bukan playing
+  ├── menghitung waktu
+  ├── memperbarui skor
+  ├── menggerakkan rintangan
+  └── membuat rintangan baru
 ```
+
+## Game/Background.swift
+
+Mengurus semua object background:
+
+- Sky
+- Stars
+- Ground
+- Ground line
+- Ground physics
+
+Fungsi utama:
+
+| Fungsi | Tugas |
+| --- | --- |
+| `createBackground()` | Membuat background utama |
+| `addStars()` | Membuat bintang |
+| `addGround()` | Membuat tanah dan physics ground |
+
+## Game/Player.swift
+
+Mengurus semua hal yang berhubungan dengan Dino:
+
+- Sprite player
+- Texture sprite sheet
+- Physics player
+- Idle frame
+- Animasi lari
+
+Fungsi utama:
+
+| Fungsi | Tugas |
+| --- | --- |
+| `createPlayer()` | Membuat Dino dan physics |
+| `dinoTexture(frame:)` | Mengambil satu frame dari `dino.png` |
+| `startIdleAnimation()` | Menampilkan frame idle diam |
+| `startPlayerRunning()` | Memutar 8 frame animasi lari |
+| `stopPlayerRunning()` | Menghentikan animasi dan kembali ke idle |
+
+Player dibuat diam sebelum mulai:
+
+```swift
+player.physicsBody?.isDynamic = false
+```
+
+Physics diaktifkan di `startGame()`.
+
+## Game/Flow.swift
+
+Mengurus alur permainan:
+
+- Lompat
+- Mulai game
+- Game over
+- Start/stop animasi player
+- Perhitungan skor
+
+Fungsi utama:
+
+| Fungsi | Tugas |
+| --- | --- |
+| `jump()` | Memulai, melompat, atau mengulang game |
+| `startGame()` | Mereset dan menjalankan game |
+| `endGame()` | Menghentikan game setelah collision |
+| `updateScore()` | Menghitung skor dan kecepatan |
+
+## Game/Obstacles.swift
+
+Mengurus semua rintangan:
+
+- Spawn timer
+- Pergerakan rintangan
+- Kaktus
+- Burung
+- Physics rintangan
+
+Fungsi utama:
 
 | Fungsi | Tugas |
 | --- | --- |
 | `getDeltaTime()` | Menghitung waktu antar-frame |
 | `createObstacleWhenNeeded()` | Menentukan waktu spawn |
 | `moveObstacles()` | Menggerakkan rintangan |
-| `createObstacle()` | Memilih jenis rintangan |
+| `createObstacle()` | Memilih kaktus atau burung |
 | `createCactus()` | Membuat kaktus |
 | `createBird()` | Membuat burung |
 | `addObstaclePhysics()` | Menambahkan physics |
 | `removeObstacles()` | Menghapus rintangan saat reset |
+
+## Game/HUD.swift
+
+Mengurus skor dan best score:
+
+- Label score
+- Label best score
+- Menampilkan teks skor
+
+Fungsi utama:
+
+- `createHUD()`
+- `updateScoreLabels()`
+
+## Game/Overlay.swift
+
+Mengurus panel informasi awal dan game over.
+
+Fungsi utama:
+
+- `showOverlay(title:message:)`
+- `addOverlayLabel(...)`
+
+## Toggle untuk belajar
+
+Toggle berada di bagian atas `Game.swift`:
+
+```swift
+var showBackground = true
+var showStars = false
+var showGround = true
+var showHUD = false
+var showPlayer = true
+var showObstacles = false
+var showOverlay = false
+```
+
+Gunakan:
+
+- `true` untuk mengaktifkan object
+- `false` untuk menonaktifkan object
+
+Saat ini project sengaja fokus pada player:
+
+- Stars nonaktif
+- HUD nonaktif
+- Obstacles nonaktif
+- Overlay nonaktif
+- Background, ground, dan player aktif
+
+Beberapa pemanggilan yang nonaktif sudah diberi komentar di source code agar mudah dipelajari. Untuk mengaktifkannya lagi, ubah toggle menjadi `true` dan hapus komentar pemanggilannya jika diperlukan.
 
 ## Alur lengkap
 
@@ -162,138 +254,34 @@ App/MainView.swift
   ↓
 SpriteView menampilkan DinoGameScene
   ↓
-didMove(to:) menyiapkan scene
+Game.swift menyiapkan scene
+  ↓
+Background.swift membuat background
+  ↓
+Player.swift membuat Dino
   ↓
 Player diam di state ready
   ↓
 Tekan "MULAI / LOMPAT"
   ↓
-jump() memanggil startGame()
+Flow.swift menjalankan startGame()
   ↓
-Physics player aktif
+Player.swift memutar animasi lari
   ↓
-update(_:) menjalankan game loop
+Game.swift menjalankan update()
   ↓
-Rintangan muncul dan bergerak
-  ↓
-Player melompat
+Obstacles.swift membuat rintangan jika diaktifkan
   ↓
 Collision memanggil endGame()
-  ↓
-State menjadi gameOver
-```
-
-## Menampilkan atau menyembunyikan object
-
-Buka `Game/Game.swift`, lalu ubah nilai pada bagian:
-
-```swift
-var showBackground = true
-var showStars = true
-var showGround = true
-var showHUD = true
-var showPlayer = true
-var showObstacles = true
-var showOverlay = true
-```
-
-Gunakan:
-
-- `true` untuk menampilkan object
-- `false` untuk menyembunyikan object
-
-Contoh:
-
-```swift
-var showStars = false
-var showObstacles = false
-```
-
-Hasilnya:
-
-- Bintang tidak ditampilkan.
-- Rintangan tidak dibuat.
-- Player dan physics tetap tersedia untuk dipelajari.
-
-Toggle ini dibaca saat scene dibuat. Setelah mengubah nilai, jalankan ulang aplikasi agar hasilnya terlihat.
-
-| Toggle | Object yang dikontrol | File pembuat object |
-| --- | --- | --- |
-| `showBackground` | Warna langit | `Game+Setup.swift` |
-| `showStars` | Bintang | `Game+Setup.swift` |
-| `showGround` | Tanah dan garis tanah | `Game+Setup.swift` |
-| `showHUD` | Skor dan best score | `Game+Setup.swift` |
-| `showPlayer` | Dino | `Game+Setup.swift` |
-| `showObstacles` | Kaktus dan burung | `Game+Obstacles.swift` |
-| `showOverlay` | Panel awal dan game over | `Game+Flow.swift` |
-
-## Code yang sengaja tidak aktif
-
-Saat ini beberapa bagian sengaja dimatikan untuk memudahkan belajar player:
-
-```swift
-showStars = false
-showHUD = false
-showObstacles = false
-showOverlay = false
-```
-
-Pemanggilan code yang tidak aktif sudah diberi komentar langsung di source code:
-
-- Pembuatan bintang dilewati.
-- HUD dilewati.
-- Rintangan tidak bergerak dan tidak dibuat.
-- Overlay awal dan game over dilewati.
-- `update(_:)` berhenti saat state bukan `playing`.
-- Physics player nonaktif sebelum `startGame()`.
-- Idle hanya menampilkan frame pertama, tanpa gerakan.
-- Animasi 8 frame aktif setelah game dimulai.
-
-Untuk mengaktifkan kembali bagian tersebut, ubah nilai toggle menjadi `true` dan hapus komentar pada pemanggilannya jika diperlukan.
-
-Jadi, saat membaca code, bedakan:
-
-```text
-Code mati       → tidak dipakai sama sekali
-Code bersyarat  → hanya berjalan pada kondisi tertentu
-Toggle debug    → dapat diubah true/false untuk belajar
 ```
 
 ## Perubahan sederhana
 
-### Mengubah teks tombol
+### Mengubah sprite player
 
-Edit `App/MainView.swift`.
+Edit `Player.swift`.
 
-Cari:
-
-```swift
-Text("MULAI / LOMPAT")
-```
-
-### Mengubah kekuatan lompatan
-
-Edit `Game/Game.swift`.
-
-Cari:
-
-```swift
-let jumpPower: CGFloat = 720
-```
-
-### Mengubah kecepatan awal
-
-Edit `Game/Game.swift`.
-
-Cari:
-
-```swift
-let initialSpeed: CGFloat = 310
-```
-
-### Sprite player dan animasi idle
-
-Sprite player menggunakan asset:
+Asset berada di:
 
 ```text
 Assets.xcassets/dino.imageset/dino.png
@@ -301,29 +289,35 @@ Assets.xcassets/dino.imageset/dino.png
 
 Sprite sheet memiliki 8 frame horizontal.
 
-Edit `Game/Game+Setup.swift` untuk melihat cara frame dipotong melalui `dinoTexture(frame:)`.
+### Mengubah kecepatan animasi player
 
-Animasi player:
-
-- Sebelum mulai: player menampilkan frame pertama secara diam sebagai idle.
-- Saat bermain: 8 frame sprite sheet diputar sebagai animasi lari.
-- Saat game over: animasi lari dihentikan dan frame idle ditampilkan lagi.
-
-Kecepatan animasi lari diatur dari:
+Edit `Game.swift`:
 
 ```swift
 let playerRunDuration: TimeInterval = 0.12
 ```
 
-### Mengubah bentuk Dino
+Nilai lebih kecil membuat animasi lebih cepat.
 
-Edit `Game/Game+Setup.swift`, lalu buka `createPlayer()`.
+### Mengubah kekuatan lompatan
+
+Edit `Game.swift`:
+
+```swift
+let jumpPower: CGFloat = 720
+```
+
+### Mengubah warna atau bentuk background
+
+Edit `Background.swift`.
 
 ### Mengubah bentuk rintangan
 
-Edit `Game/Game+Obstacles.swift`.
+Edit `Obstacles.swift`.
 
-Gunakan `createCactus()` untuk kaktus dan `createBird()` untuk burung.
+### Mengubah teks tombol
+
+Edit `App/MainView.swift`.
 
 ## Ringkasan
 
@@ -333,13 +327,17 @@ App/
 
 Game/
   ├── Game.swift
-  │     └── State, lifecycle, update, input, physics
-  ├── Game+Setup.swift
-  │     └── Background, HUD, dan player
-  ├── Game+Flow.swift
-  │     └── Start, jump, game over, overlay, skor
-  └── Game+Obstacles.swift
-        └── Spawn, gerak, dan physics rintangan
+  │     └── Pengatur utama
+  ├── Background.swift
+  │     └── Background, stars, dan ground
+  ├── Player.swift
+  │     └── Dino, texture, dan animasi
+  ├── HUD.swift
+  │     └── Score dan best score
+  ├── Overlay.swift
+  │     └── Panel informasi
+  ├── Flow.swift
+  │     └── Start, jump, dan game over
+  └── Obstacles.swift
+        └── Kaktus, burung, dan physics rintangan
 ```
-
-Untuk memahami fitur tertentu, cari fungsi yang memulai alurnya lalu ikuti fungsi yang dipanggil dari sana.
