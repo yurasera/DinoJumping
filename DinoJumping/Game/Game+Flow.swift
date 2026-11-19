@@ -57,6 +57,8 @@ extension DinoGameScene {
     // MARK: - Overlay
 
     func showOverlay(title: String, message: String) {
+        guard showOverlay else { return }
+
         overlay.removeFromParent()
         overlay.removeAllChildren()
         overlay.zPosition = 20

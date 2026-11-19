@@ -36,6 +36,8 @@ extension DinoGameScene {
     // MARK: - Create obstacles
 
     func createObstacle() {
+        guard showObstacles else { return }
+
         let isBird = Int.random(in: 0...4) == 0
 
         if isBird {

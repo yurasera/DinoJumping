@@ -175,6 +175,50 @@ Collision memanggil endGame()
 State menjadi gameOver
 ```
 
+## Menampilkan atau menyembunyikan object
+
+Buka `Game/Game.swift`, lalu ubah nilai pada bagian:
+
+```swift
+var showBackground = true
+var showStars = true
+var showGround = true
+var showHUD = true
+var showPlayer = true
+var showObstacles = true
+var showOverlay = true
+```
+
+Gunakan:
+
+- `true` untuk menampilkan object
+- `false` untuk menyembunyikan object
+
+Contoh:
+
+```swift
+var showStars = false
+var showObstacles = false
+```
+
+Hasilnya:
+
+- Bintang tidak ditampilkan.
+- Rintangan tidak dibuat.
+- Player dan physics tetap tersedia untuk dipelajari.
+
+Toggle ini dibaca saat scene dibuat. Setelah mengubah nilai, jalankan ulang aplikasi agar hasilnya terlihat.
+
+| Toggle | Object yang dikontrol | File pembuat object |
+| --- | --- | --- |
+| `showBackground` | Warna langit | `Game+Setup.swift` |
+| `showStars` | Bintang | `Game+Setup.swift` |
+| `showGround` | Tanah dan garis tanah | `Game+Setup.swift` |
+| `showHUD` | Skor dan best score | `Game+Setup.swift` |
+| `showPlayer` | Dino | `Game+Setup.swift` |
+| `showObstacles` | Kaktus dan burung | `Game+Obstacles.swift` |
+| `showOverlay` | Panel awal dan game over | `Game+Flow.swift` |
+
 ## Perubahan sederhana
 
 ### Mengubah teks tombol

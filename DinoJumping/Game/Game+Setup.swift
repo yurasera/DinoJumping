@@ -7,11 +7,15 @@ extension DinoGameScene {
         let sky = SKShapeNode(rectOf: CGSize(width: size.width, height: size.height))
         sky.fillColor = backgroundColorValue
         sky.strokeColor = .clear
+        sky.isHidden = !showBackground
         sky.position = CGPoint(x: size.width / 2, y: size.height / 2)
         sky.zPosition = -10
         addChild(sky)
 
-        addStars()
+        if showStars {
+            addStars()
+        }
+
         addGround()
     }
 
@@ -35,6 +39,7 @@ extension DinoGameScene {
         )
         ground.fillColor = groundColor
         ground.strokeColor = .clear
+        ground.isHidden = !showGround
         ground.position = CGPoint(x: size.width / 2, y: groundHeight / 2)
         ground.zPosition = -8
         addChild(ground)
@@ -42,6 +47,7 @@ extension DinoGameScene {
         let groundLine = SKShapeNode(rectOf: CGSize(width: size.width, height: 4))
         groundLine.fillColor = SKColor(red: 0.54, green: 0.46, blue: 0.97, alpha: 1)
         groundLine.strokeColor = .clear
+        groundLine.isHidden = !showGround
         groundLine.position = CGPoint(x: size.width / 2, y: groundY)
         groundLine.zPosition = -7
         addChild(groundLine)
@@ -62,6 +68,7 @@ extension DinoGameScene {
     func createHUD() {
         scoreLabel.fontSize = 22
         scoreLabel.fontColor = accentColor
+        scoreLabel.isHidden = !showHUD
         scoreLabel.horizontalAlignmentMode = .left
         scoreLabel.position = CGPoint(x: 22, y: size.height - 42)
         scoreLabel.zPosition = 10
@@ -69,6 +76,7 @@ extension DinoGameScene {
 
         bestLabel.fontSize = 14
         bestLabel.fontColor = .white.withAlphaComponent(0.75)
+        bestLabel.isHidden = !showHUD
         bestLabel.horizontalAlignmentMode = .right
         bestLabel.position = CGPoint(x: size.width - 22, y: size.height - 39)
         bestLabel.zPosition = 10
@@ -81,6 +89,7 @@ extension DinoGameScene {
 
     func createPlayer() {
         player.name = "player"
+        player.isHidden = !showPlayer
         player.position = CGPoint(x: 125, y: groundY + 36)
         player.zPosition = 5
 

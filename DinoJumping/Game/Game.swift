@@ -21,6 +21,15 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
     let jumpPower: CGFloat = 720
     let initialSpeed: CGFloat = 310
 
+    // Ubah true/false untuk mempelajari tiap bagian visual game.
+    var showBackground = true
+    var showStars = true
+    var showGround = true
+    var showHUD = true
+    var showPlayer = true
+    var showObstacles = true
+    var showOverlay = true
+
     let backgroundColorValue = SKColor(red: 0.15, green: 0.09, blue: 0.35, alpha: 1)
     let groundColor = SKColor(red: 0.09, green: 0.05, blue: 0.22, alpha: 1)
     let accentColor = SKColor(red: 1.0, green: 0.82, blue: 0.25, alpha: 1)
