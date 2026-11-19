@@ -47,13 +47,13 @@ extension DinoGameScene {
 
         let moveUp = SKAction.moveBy(
             x: 0,
-            y: 120,
-            duration: 0.3
+            y: 160,
+            duration: 0.2
         )
         let moveDown = SKAction.moveBy(
             x: 0,
-            y: -120,
-            duration: 0.3
+            y: -160,
+            duration: 0.2
         )
         let finishJump = SKAction.run { [weak self] in
             guard let self else { return }
