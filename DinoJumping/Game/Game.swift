@@ -20,7 +20,7 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
     let gravity: CGFloat = -1_850
     let jumpPower: CGFloat = 700
     let initialSpeed: CGFloat = 300
-    let playerRunDuration: TimeInterval = 0.12
+    let playerRunDuration: TimeInterval = 0.14
 
     // Ubah true/false untuk mempelajari tiap bagian visual game.
     var showBackground = true

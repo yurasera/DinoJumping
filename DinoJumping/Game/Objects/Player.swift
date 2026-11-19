@@ -47,12 +47,12 @@ extension DinoGameScene {
 
         let moveUp = SKAction.moveBy(
             x: 0,
-            y: 160,
+            y: 140,
             duration: 0.2
         )
         let moveDown = SKAction.moveBy(
             x: 0,
-            y: -160,
+            y: -140,
             duration: 0.2
         )
         let finishJump = SKAction.run { [weak self] in
@@ -93,12 +93,16 @@ extension DinoGameScene {
     }
 
     func startPlayerRunning() {
-        dinoSprite.removeAction(forKey: "idle")
+        dinoSprite.removeAction(forKey: "running")
 
-        // Delapan frame ini hanya berjalan setelah startGame().
         let frames = (0..<8).map { dinoTexture(frame: $0) }
         let running = SKAction.repeatForever(
-            SKAction.animate(with: frames, timePerFrame: playerRunDuration)
+            SKAction.animate(
+                with: frames,
+                timePerFrame: playerRunDuration,
+                resize: false,
+                restore: false
+            )
         )
 
         dinoSprite.run(running, withKey: "running")
