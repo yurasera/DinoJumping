@@ -16,7 +16,7 @@ extension DinoGameScene {
     }
 
     func createObstacleWhenNeeded() {
-        let spawnInterval = max(0.72, 1.45 - elapsedTime * 0.008)
+        let spawnInterval = max(2.5, 3.5 - elapsedTime * 0.005)
 
         guard obstacleTimer > spawnInterval else { return }
 

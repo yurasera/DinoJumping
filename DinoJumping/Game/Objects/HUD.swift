@@ -20,7 +20,7 @@ extension DinoGameScene {
         bestLabel.zPosition = 10
         addChild(bestLabel)
 
-        // updateScoreLabels() // HUD sedang dimatikan.
+         updateScoreLabels() // HUD sedang dimatikan.
     }
 
     func updateScoreLabels() {

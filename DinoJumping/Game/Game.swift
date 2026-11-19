@@ -26,7 +26,7 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
     var showBackground = true
     var showStars = true
     var showGround = true
-    var showHUD = false
+    var showHUD = true
     var showPlayer = true
     var showObstacles = true
     var showOverlay = true
@@ -53,7 +53,7 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
     var elapsedTime: TimeInterval = 0
     var lastUpdateTime: TimeInterval = 0
     var obstacleTimer: TimeInterval = 0
-    var gameSpeed: CGFloat = 110
+    var gameSpeed: CGFloat = 800
 
     var groundY: CGFloat {
         groundHeight
@@ -71,7 +71,7 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
         createBackground()
 
         // HUD sedang dimatikan karena showHUD = false.
-         createHUD()
+        createHUD()
 
         createPlayer()
         startIdleAnimation()
