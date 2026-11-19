@@ -1,9 +1,6 @@
 import SpriteKit
 
 extension DinoGameScene {
-    // Rintangan sedang tidak dipakai karena showObstacles = false di Game.swift.
-    // Fungsi-fungsi di file ini tetap disimpan agar mudah diaktifkan kembali.
-
     // MARK: - Game loop helpers
 
     func getDeltaTime(_ currentTime: TimeInterval) -> TimeInterval {
@@ -39,7 +36,6 @@ extension DinoGameScene {
     // MARK: - Create obstacles
 
     func createObstacle() {
-        // Saat showObstacles false, rintangan tidak dibuat.
         guard showObstacles else { return }
 
         let isBird = Int.random(in: 0...4) == 0
@@ -47,12 +43,12 @@ extension DinoGameScene {
         if isBird {
             createBird()
         } else {
-            createCactus()
+            createPalmTree()
         }
     }
 
-    func createCactus() {
-        let height = CGFloat(Int.random(in: 42...70))
+    func createPalmTree() {
+        let height = CGFloat(Int.random(in: 60...82))
         let obstacle = SKNode()
         obstacle.name = "obstacle"
         obstacle.position = CGPoint(
@@ -60,26 +56,39 @@ extension DinoGameScene {
             y: groundY + height / 2
         )
 
+        let trunkColor = SKColor(red: 0.55, green: 0.30, blue: 0.12, alpha: 1)
+        let leafColor = SKColor(red: 0.18, green: 0.70, blue: 0.30, alpha: 1)
+
         let trunk = SKShapeNode(
-            rectOf: CGSize(width: 16, height: height),
-            cornerRadius: 6
+            rectOf: CGSize(width: 12, height: height),
+            cornerRadius: 5
         )
-        trunk.fillColor = dinoColor
+        trunk.fillColor = trunkColor
         trunk.strokeColor = .clear
+        trunk.zRotation = -0.08
         obstacle.addChild(trunk)
 
-        let arm = SKShapeNode(
-            rectOf: CGSize(width: 10, height: height * 0.32),
-            cornerRadius: 4
-        )
-        arm.fillColor = dinoColor
-        arm.strokeColor = .clear
-        arm.position = CGPoint(x: 14, y: height * 0.15)
-        obstacle.addChild(arm)
+        let crown = SKShapeNode(ellipseOf: CGSize(width: 42, height: 18))
+        crown.fillColor = leafColor
+        crown.strokeColor = .clear
+        crown.position = CGPoint(x: 0, y: height / 2)
+        obstacle.addChild(crown)
+
+        for angle in [-0.8, -0.4, 0.0, 0.4, 0.8] {
+            let leaf = SKShapeNode(
+                rectOf: CGSize(width: 28, height: 6),
+                cornerRadius: 3
+            )
+            leaf.fillColor = leafColor
+            leaf.strokeColor = .clear
+            leaf.position = CGPoint(x: 0, y: height / 2)
+            leaf.zRotation = angle
+            obstacle.addChild(leaf)
+        }
 
         addObstaclePhysics(
             to: obstacle,
-            size: CGSize(width: 30, height: height * 0.85)
+            size: CGSize(width: 30, height: height * 0.9)
         )
     }
 
