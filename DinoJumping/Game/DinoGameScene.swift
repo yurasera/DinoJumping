@@ -2,7 +2,6 @@ import SpriteKit
 
 final class DinoGameScene: SKScene {
     private let player = PlayerNode()
-    private let groundHeight: CGFloat = 72
 
     override init(size: CGSize) {
         super.init(size: size)
@@ -16,25 +15,20 @@ final class DinoGameScene: SKScene {
     override func didMove(to view: SKView) {
         backgroundColor = .clear
         addGround()
+        addObstacle()
         addPlayer()
     }
 
     private func addGround() {
-        let ground = SKShapeNode(
-            rectOf: CGSize(
-                width: size.width * 2,
-                height: groundHeight
-            )
-        )
-        ground.name = "ground"
-        ground.position = CGPoint(
-            x: size.width / 2,
-            y: groundHeight / 2
-        )
-        ground.fillColor = SKColor(red: 0.16, green: 0.10, blue: 0.30, alpha: 1)
-        ground.strokeColor = SKColor(red: 0.67, green: 0.42, blue: 0.96, alpha: 1)
-        ground.lineWidth = 3
+        let ground = GroundNode(width: size.width * 2, height: 72)
+        ground.position = CGPoint(x: size.width / 2, y: 36)
         addChild(ground)
+    }
+
+    private func addObstacle() {
+        let obstacle = ObstacleNode()
+        obstacle.position = CGPoint(x: size.width * 0.72, y: 110)
+        addChild(obstacle)
     }
 
     private func addPlayer() {
