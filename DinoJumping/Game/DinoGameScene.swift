@@ -15,14 +15,18 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
     }
 
     override func didMove(to view: SKView) {
-        backgroundColor = .clear
+        backgroundColor = SKColor(
+            red: 0.10,
+            green: 0.06,
+            blue: 0.22,
+            alpha: 1
+        )
         physicsWorld.gravity = CGVector(dx: 0, dy: -900)
         physicsWorld.contactDelegate = self
 
         addGround()
         addObstacle()
         addPlayer()
-        isPaused = true
     }
 
     private func addGround() {
@@ -46,7 +50,10 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
 
     func startGame() {
         isGameOver = false
+        canJump = true
         isPaused = false
+        player.physicsBody?.isDynamic = true
+        player.physicsBody?.velocity = .zero
     }
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -54,10 +61,25 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
     }
 
     func jump() {
-        guard canJump, !isGameOver else { return }
+        guard !isGameOver, player.action(forKey: "jump") == nil else { return }
 
-        canJump = false
-        player.physicsBody?.applyImpulse(CGVector(dx: 0, dy: 560))
+        let groundY = player.position.y
+        let jumpHeight: CGFloat = 150
+
+        player.physicsBody?.isDynamic = false
+
+        let jump = SKAction.customAction(withDuration: 0.9) { node, elapsedTime in
+            let progress = min(max(elapsedTime / 0.9, 0), 1)
+            let arc = 4 * progress * (1 - progress)
+            node.position.y = groundY + jumpHeight * arc
+        }
+
+        let resumePhysics = SKAction.run { [weak player] in
+            player?.position.y = groundY
+            player?.physicsBody?.isDynamic = true
+        }
+
+        player.run(.sequence([jump, resumePhysics]), withKey: "jump")
     }
 
     func didBegin(_ contact: SKPhysicsContact) {

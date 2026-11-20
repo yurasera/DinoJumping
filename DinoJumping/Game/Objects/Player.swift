@@ -13,6 +13,7 @@ final class PlayerNode: SKSpriteNode {
         anchorPoint = CGPoint(x: 0.5, y: 0.5)
 
         physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: 70, height: 78))
+        physicsBody?.isDynamic = false
         physicsBody?.allowsRotation = false
         physicsBody?.categoryBitMask = PhysicsCategory.player
         physicsBody?.collisionBitMask = PhysicsCategory.ground | PhysicsCategory.obstacle
