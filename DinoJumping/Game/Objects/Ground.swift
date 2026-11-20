@@ -1,5 +1,11 @@
 import SpriteKit
 
+enum PhysicsCategory {
+    static let ground: UInt32 = 1 << 0
+    static let player: UInt32 = 1 << 1
+    static let obstacle: UInt32 = 1 << 2
+}
+
 final class GroundNode: SKShapeNode {
     init(width: CGFloat, height: CGFloat) {
         super.init()
@@ -17,6 +23,14 @@ final class GroundNode: SKShapeNode {
         fillColor = SKColor(red: 0.16, green: 0.10, blue: 0.30, alpha: 1)
         strokeColor = SKColor(red: 0.67, green: 0.42, blue: 0.96, alpha: 1)
         lineWidth = 3
+
+        physicsBody = SKPhysicsBody(
+            edgeFrom: CGPoint(x: -width / 2, y: height / 2),
+            to: CGPoint(x: width / 2, y: height / 2)
+        )
+        physicsBody?.isDynamic = false
+        physicsBody?.categoryBitMask = PhysicsCategory.ground
+        physicsBody?.collisionBitMask = PhysicsCategory.player
     }
 
     required init?(coder aDecoder: NSCoder) {

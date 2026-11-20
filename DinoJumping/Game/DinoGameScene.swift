@@ -1,7 +1,9 @@
 import SpriteKit
 
-final class DinoGameScene: SKScene {
+final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
     private let player = PlayerNode()
+    private var canJump = true
+    private var isGameOver = false
 
     override init(size: CGSize) {
         super.init(size: size)
@@ -14,6 +16,9 @@ final class DinoGameScene: SKScene {
 
     override func didMove(to view: SKView) {
         backgroundColor = .clear
+        physicsWorld.gravity = CGVector(dx: 0, dy: -900)
+        physicsWorld.contactDelegate = self
+
         addGround()
         addObstacle()
         addPlayer()
@@ -34,7 +39,41 @@ final class DinoGameScene: SKScene {
     private func addPlayer() {
         guard player.parent == nil else { return }
 
-        player.position = CGPoint(x: size.width * 0.18, y: size.height * 0.22)
+        player.position = CGPoint(x: size.width * 0.18, y: 111)
         addChild(player)
+    }
+
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        jump()
+    }
+
+    private func jump() {
+        guard canJump, !isGameOver else { return }
+
+        canJump = false
+        player.physicsBody?.applyImpulse(CGVector(dx: 0, dy: 560))
+    }
+
+    func didBegin(_ contact: SKPhysicsContact) {
+        let names = [contact.bodyA.node?.name, contact.bodyB.node?.name]
+
+        if names.contains("ground") {
+            canJump = true
+        }
+
+        if names.contains("obstacle") {
+            isGameOver = true
+            player.removeAction(forKey: "running")
+            player.color = .white
+            player.colorBlendFactor = 0.5
+        }
+    }
+
+    func didEnd(_ contact: SKPhysicsContact) {
+        let names = [contact.bodyA.node?.name, contact.bodyB.node?.name]
+
+        if names.contains("ground") {
+            canJump = false
+        }
     }
 }

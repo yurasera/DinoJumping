@@ -15,6 +15,12 @@ final class ObstacleNode: SKShapeNode {
         strokeColor = SKColor(red: 1.0, green: 0.72, blue: 0.78, alpha: 1)
         lineWidth = 3
         zPosition = 1
+
+        physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: 38, height: 76))
+        physicsBody?.isDynamic = false
+        physicsBody?.categoryBitMask = PhysicsCategory.obstacle
+        physicsBody?.collisionBitMask = PhysicsCategory.player
+        physicsBody?.contactTestBitMask = PhysicsCategory.player
     }
 
     required init?(coder aDecoder: NSCoder) {
