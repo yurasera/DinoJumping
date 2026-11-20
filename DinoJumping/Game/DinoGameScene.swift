@@ -22,6 +22,7 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
         addGround()
         addObstacle()
         addPlayer()
+        isPaused = true
     }
 
     private func addGround() {
@@ -43,11 +44,16 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
         addChild(player)
     }
 
+    func startGame() {
+        isGameOver = false
+        isPaused = false
+    }
+
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         jump()
     }
 
-    private func jump() {
+    func jump() {
         guard canJump, !isGameOver else { return }
 
         canJump = false
