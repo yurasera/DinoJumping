@@ -5,7 +5,7 @@ struct GameMainView: View {
     @State private var gameScene = DinoGameScene(
         size: CGSize(width: 900, height: 500)
     )
-    @State private var gameStarted = false
+    @State private var gameState: GameState = .ready
 
     var body: some View {
         ZStack {
@@ -15,42 +15,26 @@ struct GameMainView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .accessibilityLabel("Permainan Dino Jumping")
 
-            if gameStarted {
+            if gameState == .playing {
                 JumpButton {
                     gameScene.jump()
                 }
             } else {
-                StartOverlay {
-                    gameScene.startGame()
-                    gameStarted = true
-                }
+                GameOverlay(
+                    gameState: gameState,
+                    startGame: {
+                        gameScene.startGame()
+                    },
+                    restartGame: {
+                        gameScene.restartGame()
+                    }
+                )
             }
         }
         .ignoresSafeArea()
-    }
-}
-
-private struct StartOverlay: View {
-    let startGame: () -> Void
-
-    var body: some View {
-        ZStack {
-            Color.black.opacity(0.48)
-                .ignoresSafeArea()
-
-            VStack(spacing: 18) {
-                Text("DINO JUMPING")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-                    .foregroundStyle(.white)
-
-                Text("Hindari obstacle dengan melompat.")
-                    .font(.body)
-                    .foregroundStyle(.white.opacity(0.85))
-
-                Button("MULAI", action: startGame)
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.large)
+        .onAppear {
+            gameScene.onGameStateChange = { newState in
+                gameState = newState
             }
         }
     }

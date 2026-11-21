@@ -2,9 +2,9 @@ import SpriteKit
 
 final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
     private let player = PlayerNode()
-    private let gameOverlay = GameOverlay()
     
     private var gameState: GameState = .ready
+    var onGameStateChange: ((GameState) -> Void)?
     private var canJump = true
 
     override init(size: CGSize) {
@@ -28,16 +28,6 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
 
         addGround()
         addPlayer()
-        
-        gameOverlay.position = CGPoint(
-            x: size.width / 2,
-            y: size.height / 2
-        )
-
-        gameOverlay.zPosition = 100
-        addChild(gameOverlay)
-
-        gameOverlay.showStart()
     }
 
     private func addGround() {
@@ -88,14 +78,13 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
 
     func startGame() {
         gameState = .playing
+        onGameStateChange?(.playing)
+
         canJump = true
-
-        gameOverlay.hide()
-
         player.physicsBody?.isDynamic = true
         player.physicsBody?.velocity = .zero
-
         player.startRunningAnimation()
+
         addObstacle()
     }
 
@@ -183,22 +172,18 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
         player.physicsBody?.isDynamic = false
         player.physicsBody?.velocity = .zero
 
-        gameOverlay.showGameOver()
+        onGameStateChange?(.gameOver)
     }
     
-    private func restartGame() {
-        gameOverlay.hide()
-
+    func restartGame() {
         enumerateChildNodes(withName: "obstacle") { node, _ in
             node.removeFromParent()
         }
 
         player.removeAction(forKey: "jump")
-        
         player.position = CGPoint(x: size.width * 0.18, y: 111)
         player.physicsBody?.isDynamic = true
         player.physicsBody?.velocity = .zero
-
         player.colorBlendFactor = 0
 
         startGame()

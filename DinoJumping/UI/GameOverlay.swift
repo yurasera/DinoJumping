@@ -4,52 +4,46 @@
 //
 //  Created by Yuhaya Lissera on 21/11/26.
 //
+import SwiftUI
 
-import SpriteKit
+struct GameOverlay: View {
 
-final class GameOverlay: SKNode {
+    let gameState: GameState
+    let startGame: () -> Void
+    let restartGame: () -> Void
 
-    func showStart() {
-        removeAllChildren()
+    var body: some View {
+        ZStack {
+            Color.black.opacity(0.48)
+                .ignoresSafeArea()
 
-        let title = SKLabelNode(text: "DINO JUMPING")
-        title.fontSize = 36
-        title.fontName = "Arial-Bold"
-        title.fontColor = .white
-        title.position = CGPoint(x: 0, y: 35)
+            VStack(spacing: 18) {
+                switch gameState {
+                case .ready:
+                    Text("DINO JUMPING")
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
 
-        let start = SKLabelNode(text: "MULAI")
-        start.name = "startButton"
-        start.fontSize = 24
-        start.fontName = "Arial-Bold"
-        start.fontColor = .yellow
-        start.position = CGPoint(x: 0, y: -25)
+                    Text("Hindari obstacle dengan melompat.")
 
-        addChild(title)
-        addChild(start)
-    }
+                    Button("MULAI", action: startGame)
+                        .buttonStyle(.borderedProminent)
+                        .controlSize(.large)
 
-    func showGameOver() {
-        removeAllChildren()
+                case .gameOver:
+                    Text("GAME OVER")
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
 
-        let title = SKLabelNode(text: "GAME OVER")
-        title.fontSize = 42
-        title.fontName = "Arial-Bold"
-        title.fontColor = .white
-        title.position = CGPoint(x: 0, y: 35)
+                    Button("RESTART", action: restartGame)
+                        .buttonStyle(.borderedProminent)
+                        .controlSize(.large)
 
-        let restart = SKLabelNode(text: "RESTART")
-        restart.name = "restartButton"
-        restart.fontSize = 24
-        restart.fontName = "Arial-Bold"
-        restart.fontColor = .yellow
-        restart.position = CGPoint(x: 0, y: -25)
-
-        addChild(title)
-        addChild(restart)
-    }
-
-    func hide() {
-        removeAllChildren()
+                case .playing:
+                    EmptyView()
+                }
+            }
+            .foregroundStyle(.white)
+        }
     }
 }
