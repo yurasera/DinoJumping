@@ -25,7 +25,7 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
         physicsWorld.contactDelegate = self
 
         addGround()
-        addObstacle()
+//        addObstacle()
         addPlayer()
     }
 
@@ -36,9 +36,34 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
     }
 
     private func addObstacle() {
-        let obstacle = ObstacleNode()
-        obstacle.position = CGPoint(x: size.width * 0.72, y: 110)
-        addChild(obstacle)
+        let spawn = SKAction.run { [weak self] in
+            guard let self, !self.isGameOver else { return }
+
+            let obstacle = ObstacleNode()
+            obstacle.position = CGPoint(
+                x: self.size.width + 50,
+                y: 110
+            )
+
+            self.addChild(obstacle)
+
+            let move = SKAction.moveTo(
+                x: -50,
+                duration: 3
+            )
+
+            obstacle.run(.sequence([
+                move,
+                .removeFromParent()
+            ]))
+        }
+
+        let wait = SKAction.wait(forDuration: 2)
+
+        run(
+            .repeatForever(.sequence([spawn, wait])),
+            withKey: "spawnObstacle"
+        )
     }
 
     private func addPlayer() {
@@ -52,8 +77,11 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
         isGameOver = false
         canJump = true
         isPaused = false
+
         player.physicsBody?.isDynamic = true
         player.physicsBody?.velocity = .zero
+
+        addObstacle()
     }
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
