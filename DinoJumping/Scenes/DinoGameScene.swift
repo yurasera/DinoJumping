@@ -164,15 +164,18 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
         guard gameState == .playing else { return }
 
         gameState = .gameOver
+        onGameStateChange?(.gameOver)
 
         removeAction(forKey: "spawnObstacle")
+
+        enumerateChildNodes(withName: "obstacle") { node, _ in
+            node.removeAllActions()
+        }
 
         player.removeAction(forKey: "running")
         player.removeAction(forKey: "jump")
         player.physicsBody?.isDynamic = false
         player.physicsBody?.velocity = .zero
-
-        onGameStateChange?(.gameOver)
     }
     
     func restartGame() {
