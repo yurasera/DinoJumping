@@ -126,9 +126,10 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
             node.position.y = groundY + jumpHeight * arc
         }
 
-        let resumePhysics = SKAction.run { [weak player] in
-            player?.position.y = groundY
-            player?.physicsBody?.isDynamic = true
+        let resumePhysics = SKAction.run { [weak self] in
+            self?.player.position.y = groundY
+            self?.player.physicsBody?.isDynamic = true
+            self?.canJump = true
         }
 
         player.run(.sequence([jump, resumePhysics]), withKey: "jump")
@@ -152,12 +153,6 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
         if names.contains("ground") {
             canJump = false
         }
-    }
-    
-    enum PhysicsCategory {
-        static let player: UInt32 = 1 << 0
-        static let ground: UInt32 = 1 << 1
-        static let obstacle: UInt32 = 1 << 2
     }
     
     private func showGameOver() {
