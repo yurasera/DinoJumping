@@ -38,7 +38,7 @@ final class PlayerNode: SKSpriteNode {
         return SKTexture(rect: rect, in: SKTexture(imageNamed: "dino"))
     }
 
-    private func startRunningAnimation() {
+    func startRunningAnimation() {
         let frames = (0..<Self.frameCount).map { Self.texture(forFrame: $0) }
         let animation = SKAction.animate(with: frames, timePerFrame: 0.12, resize: false, restore: false)
         run(.repeatForever(animation), withKey: "running")

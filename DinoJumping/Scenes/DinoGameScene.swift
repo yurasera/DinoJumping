@@ -2,8 +2,10 @@ import SpriteKit
 
 final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
     private let player = PlayerNode()
+    private let gameOverlay = GameOverlay()
+    
+    private var gameState: GameState = .ready
     private var canJump = true
-    private var isGameOver = false
 
     override init(size: CGSize) {
         super.init(size: size)
@@ -25,8 +27,17 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
         physicsWorld.contactDelegate = self
 
         addGround()
-//        addObstacle()
         addPlayer()
+        
+        gameOverlay.position = CGPoint(
+            x: size.width / 2,
+            y: size.height / 2
+        )
+
+        gameOverlay.zPosition = 100
+        addChild(gameOverlay)
+
+        gameOverlay.showStart()
     }
 
     private func addGround() {
@@ -36,8 +47,10 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
     }
 
     private func addObstacle() {
+        removeAction(forKey: "spawnObstacle")
+        
         let spawn = SKAction.run { [weak self] in
-            guard let self, !self.isGameOver else { return }
+            guard let self, self.gameState == .playing else { return }
 
             let obstacle = ObstacleNode()
             obstacle.position = CGPoint(
@@ -74,22 +87,44 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
     }
 
     func startGame() {
-        isGameOver = false
+        gameState = .playing
         canJump = true
-        isPaused = false
+
+        gameOverlay.hide()
 
         player.physicsBody?.isDynamic = true
         player.physicsBody?.velocity = .zero
 
+        player.startRunningAnimation()
         addObstacle()
     }
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        jump()
+        guard let touch = touches.first else { return }
+
+        let touchedNodes = nodes(at: touch.location(in: self))
+
+        if touchedNodes.contains(where: { $0.name == "startButton" }) {
+            startGame()
+            return
+        }
+
+        if touchedNodes.contains(where: { $0.name == "restartButton" }) {
+            restartGame()
+            return
+        }
+
+        if gameState == .playing {
+            jump()
+        }
     }
 
     func jump() {
-        guard !isGameOver, player.action(forKey: "jump") == nil else { return }
+        guard gameState == .playing,
+              canJump,
+              player.action(forKey: "jump") == nil else { return }
+
+        canJump = false
 
         let groundY = player.position.y
         let jumpHeight: CGFloat = 150
@@ -118,15 +153,7 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
         }
 
         if names.contains("obstacle") {
-            isGameOver = true
-            
-            player.removeAction(forKey: "running")
-            player.physicsBody?.velocity = .zero
-            
-            player.color = .white
-            player.colorBlendFactor = 0.5
-            
-            isPaused = true
+            showGameOver()
         }
     }
 
@@ -142,5 +169,38 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
         static let player: UInt32 = 1 << 0
         static let ground: UInt32 = 1 << 1
         static let obstacle: UInt32 = 1 << 2
+    }
+    
+    private func showGameOver() {
+        guard gameState == .playing else { return }
+
+        gameState = .gameOver
+
+        removeAction(forKey: "spawnObstacle")
+
+        player.removeAction(forKey: "running")
+        player.removeAction(forKey: "jump")
+        player.physicsBody?.isDynamic = false
+        player.physicsBody?.velocity = .zero
+
+        gameOverlay.showGameOver()
+    }
+    
+    private func restartGame() {
+        gameOverlay.hide()
+
+        enumerateChildNodes(withName: "obstacle") { node, _ in
+            node.removeFromParent()
+        }
+
+        player.removeAction(forKey: "jump")
+        
+        player.position = CGPoint(x: size.width * 0.18, y: 111)
+        player.physicsBody?.isDynamic = true
+        player.physicsBody?.velocity = .zero
+
+        player.colorBlendFactor = 0
+
+        startGame()
     }
 }
