@@ -6,6 +6,7 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
     private var ground: GroundNode?
     private var sun: SKShapeNode?
     private var moon: SKShapeNode?
+    private var clouds: [CloudNode] = []
     
     private var gameState: GameState = .ready
     var onGameStateChange: ((GameState) -> Void)?
@@ -27,6 +28,7 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
 
         addMoon()
         addSun()
+        addClouds()
         addGround()
         addPlayer()
     }
@@ -127,15 +129,36 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
         self.ground = ground
     }
 
+    private func addClouds() {
+        let cloudAssets = (1...7).map { String(format: "Clouds_%02d", $0) }.shuffled()
+        let lanes: [CGFloat] = [0.12, 0.40, 0.70, 1.02]
+        let heights: [CGFloat] = [0.84, 0.72, 0.89, 0.64].shuffled()
+
+        clouds = zip(lanes, heights).enumerated().map { index, layout in
+            let (lane, height) = layout
+            let width = CGFloat.random(in: 130...190)
+            let cloud = CloudNode(
+                assetName: cloudAssets[index],
+                size: CGSize(width: width, height: width * 4 / 9),
+                position: CGPoint(x: size.width * lane, y: size.height * height),
+                opacity: CGFloat.random(in: 0.42...0.62)
+            )
+            addChild(cloud)
+            return cloud
+        }
+    }
+
     // Perubahan fix: scroll tile visual, tetapi physics ground tidak ikut bergerak.
     private func startGroundMovement() {
         let obstacleSpeed = (size.width + 100) / 3
         ground?.startScrolling(speed: obstacleSpeed)
+        clouds.forEach { $0.startScrolling(speed: obstacleSpeed * 0.18, sceneWidth: size.width) }
     }
 
     // Perubahan fix: kembalikan posisi tile tanpa mengubah physics ground.
     private func resetGround() {
         ground?.resetScrolling()
+        clouds.forEach { $0.resetScrolling() }
     }
 
     private func addObstacle() {
@@ -266,6 +289,7 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
 
         removeAction(forKey: "spawnObstacle")
         ground?.stopScrolling()
+        clouds.forEach { $0.stopScrolling() }
 
         enumerateChildNodes(withName: "obstacle") { node, _ in
             node.removeAllActions()
