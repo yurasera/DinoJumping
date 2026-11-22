@@ -20,12 +20,7 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
     }
 
     override func didMove(to view: SKView) {
-        backgroundColor = SKColor(
-            red: 0.10,
-            green: 0.06,
-            blue: 0.22,
-            alpha: 1
-        )
+        backgroundColor = GameViewTheme.spriteKitBackground()
         physicsWorld.gravity = CGVector(dx: 0, dy: -900)
         physicsWorld.contactDelegate = self
 
@@ -56,6 +51,8 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
     }
 
     private func updateSunPosition() {
+        backgroundColor = GameViewTheme.spriteKitBackground()
+
         let time = Calendar.current.dateComponents([.hour, .minute, .second], from: Date())
         let hour = CGFloat(time.hour ?? 0)
             + CGFloat(time.minute ?? 0) / 60
