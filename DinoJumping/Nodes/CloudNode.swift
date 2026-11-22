@@ -1,6 +1,8 @@
 import SpriteKit
 
 final class CloudNode: SKSpriteNode {
+    static let aspectRatio: CGFloat = 4 / 9
+    private static let foregroundSkyLayer: CGFloat = 1
     private let initialPosition: CGPoint
 
     init(assetName: String, size: CGSize, position: CGPoint, opacity: CGFloat) {
@@ -9,7 +11,8 @@ final class CloudNode: SKSpriteNode {
 
         self.position = position
         alpha = opacity
-        zPosition = -0.5
+        // The sun and moon use layer -1, so clouds always drift in front of them.
+        zPosition = Self.foregroundSkyLayer
     }
 
     required init?(coder aDecoder: NSCoder) {

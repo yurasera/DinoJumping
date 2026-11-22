@@ -131,17 +131,17 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
 
     private func addClouds() {
         let cloudAssets = (1...7).map { String(format: "Clouds_%02d", $0) }.shuffled()
-        let lanes: [CGFloat] = [0.12, 0.40, 0.70, 1.02]
-        let heights: [CGFloat] = [0.84, 0.72, 0.89, 0.64].shuffled()
+        let lanes: [CGFloat] = [0.08, 0.31, 0.54, 0.77, 1.02, 1.27, 1.52]
+        let heights: [CGFloat] = [0.88, 0.70, 0.82, 0.63, 0.91, 0.75, 0.85].shuffled()
 
         clouds = zip(lanes, heights).enumerated().map { index, layout in
             let (lane, height) = layout
-            let width = CGFloat.random(in: 130...190)
+            let width = CGFloat.random(in: 190...280)
             let cloud = CloudNode(
                 assetName: cloudAssets[index],
-                size: CGSize(width: width, height: width * 4 / 9),
+                size: CGSize(width: width, height: width * CloudNode.aspectRatio),
                 position: CGPoint(x: size.width * lane, y: size.height * height),
-                opacity: CGFloat.random(in: 0.42...0.62)
+                opacity: CGFloat.random(in: 0.40...0.60)
             )
             addChild(cloud)
             return cloud
