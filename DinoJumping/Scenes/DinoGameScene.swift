@@ -105,7 +105,7 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
     private func addPlayer() {
         guard player.parent == nil else { return }
 
-        player.position = CGPoint(x: size.width * 0.18, y: 111)
+        player.position = CGPoint(x: size.width * 0.18, y: 105)
         addChild(player)
     }
 
@@ -214,7 +214,7 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
         }
 
         player.removeAction(forKey: "jump")
-        player.position = CGPoint(x: size.width * 0.18, y: 111)
+        player.position = CGPoint(x: size.width * 0.18, y: 105)
         player.physicsBody?.isDynamic = true
         player.physicsBody?.velocity = .zero
         player.colorBlendFactor = 0
