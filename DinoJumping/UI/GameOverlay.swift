@@ -9,6 +9,8 @@ import SwiftUI
 struct GameOverlay: View {
 
     let gameState: GameState
+    let score: Int
+    let highScore: Int
     let startGame: () -> Void
     let restartGame: () -> Void
 
@@ -26,6 +28,9 @@ struct GameOverlay: View {
 
                     Text("Hindari obstacle dengan melompat.")
 
+                    Text("Skor tertinggi: \(highScore)")
+                        .font(.headline)
+
                     Button("MULAI", action: startGame)
                         .buttonStyle(.borderedProminent)
                         .controlSize(.large)
@@ -34,6 +39,11 @@ struct GameOverlay: View {
                     Text("GAME OVER")
                         .font(.largeTitle)
                         .fontWeight(.bold)
+
+                    Text("Skor: \(score)")
+                        .font(.title2.weight(.bold))
+
+                    Text("Skor tertinggi: \(highScore)")
 
                     Button("RESTART", action: restartGame)
                         .buttonStyle(.borderedProminent)

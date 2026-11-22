@@ -10,7 +10,11 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
     
     private var gameState: GameState = .ready
     var onGameStateChange: ((GameState) -> Void)?
+    var onScoreChange: ((Int, Int) -> Void)?
     private var canJump = true
+    private var gameStartTime: TimeInterval?
+    private var score = 0
+    private var highScore = UserDefaults.standard.integer(forKey: "DinoJumping.highScore")
 
     override init(size: CGSize) {
         super.init(size: size)
@@ -205,6 +209,9 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
         gameState = .playing
         onGameStateChange?(.playing)
 
+        score = 0
+        gameStartTime = nil
+        publishScore()
         canJump = true
         player.physicsBody?.isDynamic = true
         player.physicsBody?.velocity = .zero
@@ -212,6 +219,29 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
 
         startGroundMovement()
         addObstacle()
+    }
+
+    override func update(_ currentTime: TimeInterval) {
+        guard gameState == .playing else { return }
+
+        if gameStartTime == nil {
+            gameStartTime = currentTime
+        }
+
+        guard let gameStartTime else { return }
+        let updatedScore = Int((currentTime - gameStartTime) * 10)
+        guard updatedScore > score else { return }
+
+        score = updatedScore
+        if score > highScore {
+            highScore = score
+            UserDefaults.standard.set(highScore, forKey: "DinoJumping.highScore")
+        }
+        publishScore()
+    }
+
+    func publishScore() {
+        onScoreChange?(score, highScore)
     }
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -286,6 +316,8 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
 
         gameState = .gameOver
         onGameStateChange?(.gameOver)
+        gameStartTime = nil
+        publishScore()
 
         removeAction(forKey: "spawnObstacle")
         ground?.stopScrolling()

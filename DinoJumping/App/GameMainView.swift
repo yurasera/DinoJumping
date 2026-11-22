@@ -6,6 +6,8 @@ struct GameMainView: View {
         size: CGSize(width: 900, height: 500)
     )
     @State private var gameState: GameState = .ready
+    @State private var score = 0
+    @State private var highScore = UserDefaults.standard.integer(forKey: "DinoJumping.highScore")
 
     var body: some View {
         ZStack {
@@ -17,6 +19,8 @@ struct GameMainView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .accessibilityLabel("Permainan Dino Jumping")
 
+            ScoreBoard(score: score, highScore: highScore)
+
             if gameState == .playing {
                 JumpButton {
                     gameScene.jump()
@@ -24,6 +28,8 @@ struct GameMainView: View {
             } else {
                 GameOverlay(
                     gameState: gameState,
+                    score: score,
+                    highScore: highScore,
                     startGame: {
                         gameScene.startGame()
                     },
@@ -38,7 +44,46 @@ struct GameMainView: View {
             gameScene.onGameStateChange = { newState in
                 gameState = newState
             }
+            gameScene.onScoreChange = { newScore, newHighScore in
+                score = newScore
+                highScore = newHighScore
+            }
+            gameScene.publishScore()
         }
+    }
+}
+
+private struct ScoreBoard: View {
+    let score: Int
+    let highScore: Int
+
+    var body: some View {
+        VStack {
+            HStack(spacing: 12) {
+                scoreLabel(title: "SKOR: ", value: score)
+                scoreLabel(title: "TERTINGGI: ", value: highScore)
+                Spacer()
+            }
+            .padding(.horizontal, 24)
+            .padding(.top, 20)
+
+            Spacer()
+        }
+        .allowsHitTesting(false)
+    }
+
+    private func scoreLabel(title: String, value: Int) -> some View {
+        HStack(spacing: 2) {
+            Text(title)
+                .font(.caption2.weight(.bold))
+                .foregroundStyle(.white.opacity(0.8))
+            Text("\(value)")
+                .font(.caption2.monospacedDigit().weight(.bold))
+                .foregroundStyle(.white)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(.black.opacity(0.25), in: RoundedRectangle(cornerRadius: 10))
     }
 }
 
