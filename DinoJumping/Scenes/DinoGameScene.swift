@@ -5,6 +5,7 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
     private let player = PlayerNode()
     private var ground: GroundNode?
     private var sun: SKShapeNode?
+    private var moon: SKShapeNode?
     
     private var gameState: GameState = .ready
     var onGameStateChange: ((GameState) -> Void)?
@@ -24,6 +25,7 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
         physicsWorld.gravity = CGVector(dx: 0, dy: -900)
         physicsWorld.contactDelegate = self
 
+        addMoon()
         addSun()
         addGround()
         addPlayer()
@@ -50,6 +52,29 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
         )
     }
 
+    private func addMoon() {
+        let moon = SKShapeNode(circleOfRadius: 34)
+        moon.fillColor = SKColor(red: 0.88, green: 0.92, blue: 1.0, alpha: 1)
+        moon.strokeColor = SKColor(red: 0.68, green: 0.76, blue: 0.94, alpha: 1)
+        moon.lineWidth = 2
+        moon.glowWidth = 5
+        moon.zPosition = -1
+        addChild(moon)
+        self.moon = moon
+
+        addMoonCrater(to: moon, position: CGPoint(x: -10, y: 8), radius: 6)
+        addMoonCrater(to: moon, position: CGPoint(x: 11, y: -7), radius: 8)
+        addMoonCrater(to: moon, position: CGPoint(x: 4, y: 17), radius: 3)
+    }
+
+    private func addMoonCrater(to moon: SKShapeNode, position: CGPoint, radius: CGFloat) {
+        let crater = SKShapeNode(circleOfRadius: radius)
+        crater.fillColor = SKColor(red: 0.66, green: 0.72, blue: 0.87, alpha: 0.55)
+        crater.strokeColor = .clear
+        crater.position = position
+        moon.addChild(crater)
+    }
+
     private func updateSunPosition() {
         backgroundColor = GameViewTheme.spriteKitBackground()
 
@@ -64,6 +89,15 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
             y: size.height * (0.28 + sin(daylightProgress * .pi) * 0.55)
         )
         sun?.isHidden = hour < 6 || hour >= 18
+
+        let nightProgress = hour >= 18
+            ? (hour - 18) / 12
+            : (hour + 6) / 12
+        moon?.position = CGPoint(
+            x: size.width * (0.1 + 0.8 * nightProgress),
+            y: size.height * (0.28 + sin(nightProgress * .pi) * 0.55)
+        )
+        moon?.isHidden = hour >= 6 && hour < 18
     }
 
     private func addGround() {
