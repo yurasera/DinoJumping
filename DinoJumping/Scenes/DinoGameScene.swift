@@ -27,8 +27,20 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
         physicsWorld.gravity = CGVector(dx: 0, dy: -900)
         physicsWorld.contactDelegate = self
 
+        addSun()
         addGround()
         addPlayer()
+    }
+
+    private func addSun() {
+        let sun = SKShapeNode(circleOfRadius: 42)
+        sun.fillColor = SKColor(red: 1.0, green: 0.72, blue: 0.24, alpha: 1)
+        sun.strokeColor = SKColor(red: 1.0, green: 0.91, blue: 0.55, alpha: 1)
+        sun.lineWidth = 3
+        sun.glowWidth = 8
+        sun.position = CGPoint(x: size.width * 0.82, y: size.height * 0.78)
+        sun.zPosition = -1
+        addChild(sun)
     }
 
     private func addGround() {
