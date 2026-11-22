@@ -1,8 +1,10 @@
+import Foundation
 import SpriteKit
 
 final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
     private let player = PlayerNode()
     private var ground: GroundNode?
+    private var sun: SKShapeNode?
     
     private var gameState: GameState = .ready
     var onGameStateChange: ((GameState) -> Void)?
@@ -41,6 +43,30 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
         sun.position = CGPoint(x: size.width * 0.82, y: size.height * 0.78)
         sun.zPosition = -1
         addChild(sun)
+        self.sun = sun
+
+        updateSunPosition()
+        run(
+            .repeatForever(.sequence([
+                .wait(forDuration: 1),
+                .run { [weak self] in self?.updateSunPosition() }
+            ])),
+            withKey: "updateSunPosition"
+        )
+    }
+
+    private func updateSunPosition() {
+        let time = Calendar.current.dateComponents([.hour, .minute, .second], from: Date())
+        let hour = CGFloat(time.hour ?? 0)
+            + CGFloat(time.minute ?? 0) / 60
+            + CGFloat(time.second ?? 0) / 3_600
+        let daylightProgress = min(max((hour - 6) / 12, 0), 1)
+
+        sun?.position = CGPoint(
+            x: size.width * (0.1 + 0.8 * daylightProgress),
+            y: size.height * (0.28 + sin(daylightProgress * .pi) * 0.55)
+        )
+        sun?.isHidden = hour < 6 || hour >= 18
     }
 
     private func addGround() {
