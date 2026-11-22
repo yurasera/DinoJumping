@@ -1,6 +1,10 @@
 import SpriteKit
 
 final class GroundNode: SKShapeNode {
+    private let tileSize: CGFloat = 32
+    private var terrainTiles: [SKSpriteNode] = []
+    private var terrainWidth: CGFloat = 0
+
     init(width: CGFloat, height: CGFloat, terrainTexture: SKTexture) {
         super.init()
 
@@ -35,22 +39,62 @@ final class GroundNode: SKShapeNode {
     }
 
     private func addTerrainTiles(width: CGFloat, height: CGFloat, texture: SKTexture) {
-        let tileWidth: CGFloat = 32
-        let tileHeight: CGFloat = 32
-        let tileCount = Int(ceil(width / tileWidth))
+        terrainWidth = width
+        let tileCount = Int(ceil(width / tileSize))
 
         for index in 0..<tileCount {
             let tile = SKSpriteNode(
                 texture: texture,
                 color: .clear,
-                size: CGSize(width: tileWidth, height: tileHeight)
+                size: CGSize(width: tileSize, height: tileSize)
             )
             tile.position = CGPoint(
-                x: -width / 2 + CGFloat(index) * tileWidth + tileWidth / 2,
-                y: height / 2 - tileHeight / 2
+                x: tileXPosition(for: index),
+                y: height / 2 - tileSize / 2
             )
             tile.zPosition = 1
             addChild(tile)
+            terrainTiles.append(tile)
         }
+    }
+
+    // Perubahan fix: hanya sprite terrain yang bergerak; physics ground tetap diam.
+    func startScrolling(speed: CGFloat) {
+        let move = SKAction.moveBy(x: -tileSize, y: 0, duration: tileSize / speed)
+        let wrap = SKAction.moveBy(
+            x: CGFloat(terrainTiles.count) * tileSize,
+            y: 0,
+            duration: 0
+        )
+        let fullLoop = SKAction.sequence([
+            .repeat(move, count: terrainTiles.count),
+            wrap
+        ])
+
+        for (index, tile) in terrainTiles.enumerated() {
+            // Setiap tile menunggu giliran keluar dari sisi kiri sebelum wrap.
+            // Jika semua tile wrap bersamaan, ground akan tampak menghilang.
+            let initialSteps = SKAction.repeat(move, count: index + 1)
+            tile.run(
+                .sequence([initialSteps, wrap, .repeatForever(fullLoop)]),
+                withKey: "scrollTerrain"
+            )
+        }
+    }
+
+    func stopScrolling() {
+        terrainTiles.forEach { $0.removeAction(forKey: "scrollTerrain") }
+    }
+
+    func resetScrolling() {
+        stopScrolling()
+
+        for (index, tile) in terrainTiles.enumerated() {
+            tile.position.x = tileXPosition(for: index)
+        }
+    }
+
+    private func tileXPosition(for index: Int) -> CGFloat {
+        -terrainWidth / 2 + CGFloat(index) * tileSize + tileSize / 2
     }
 }

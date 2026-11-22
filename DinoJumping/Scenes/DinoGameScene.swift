@@ -2,6 +2,7 @@ import SpriteKit
 
 final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
     private let player = PlayerNode()
+    private var ground: GroundNode?
     
     private var gameState: GameState = .ready
     var onGameStateChange: ((GameState) -> Void)?
@@ -54,6 +55,18 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
         )
         ground.position = CGPoint(x: size.width / 2, y: 36)
         addChild(ground)
+        self.ground = ground
+    }
+
+    // Perubahan fix: scroll tile visual, tetapi physics ground tidak ikut bergerak.
+    private func startGroundMovement() {
+        let obstacleSpeed = (size.width + 100) / 3
+        ground?.startScrolling(speed: obstacleSpeed)
+    }
+
+    // Perubahan fix: kembalikan posisi tile tanpa mengubah physics ground.
+    private func resetGround() {
+        ground?.resetScrolling()
     }
 
     private func addObstacle() {
@@ -105,6 +118,7 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
         player.physicsBody?.velocity = .zero
         player.startRunningAnimation()
 
+        startGroundMovement()
         addObstacle()
     }
 
@@ -182,6 +196,7 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
         onGameStateChange?(.gameOver)
 
         removeAction(forKey: "spawnObstacle")
+        ground?.stopScrolling()
 
         enumerateChildNodes(withName: "obstacle") { node, _ in
             node.removeAllActions()
@@ -204,6 +219,7 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
         player.physicsBody?.velocity = .zero
         player.colorBlendFactor = 0
 
+        resetGround()
         startGame()
     }
 }
