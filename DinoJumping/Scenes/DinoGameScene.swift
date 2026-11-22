@@ -53,7 +53,7 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
     }
 
     private func addMoon() {
-        let moon = SKShapeNode(circleOfRadius: 34)
+        let moon = SKShapeNode(circleOfRadius: 28)
         moon.fillColor = SKColor(red: 0.88, green: 0.92, blue: 1.0, alpha: 1)
         moon.strokeColor = SKColor(red: 0.68, green: 0.76, blue: 0.94, alpha: 1)
         moon.lineWidth = 2
