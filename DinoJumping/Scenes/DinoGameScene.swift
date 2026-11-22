@@ -31,7 +31,22 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
     }
 
     private func addGround() {
-        let ground = GroundNode(width: size.width * 2, height: 72)
+        let terrainSheet = SKTexture(imageNamed: "Terrain")
+        terrainSheet.filteringMode = .nearest
+
+        // Terrain is a 17 × 5 sheet of 32-point tiles. Select its solid
+        // grass-platform tile and let GroundNode repeat it across the floor.
+        let terrainTile = SKTexture(
+            rect: CGRect(x: 0, y: 0, width: 1.0 / 17.0, height: 1.0 / 5.0),
+            in: terrainSheet
+        )
+        terrainTile.filteringMode = .nearest
+
+        let ground = GroundNode(
+            width: size.width * 2,
+            height: 72,
+            terrainTexture: terrainTile
+        )
         ground.position = CGPoint(x: size.width / 2, y: 36)
         addChild(ground)
     }

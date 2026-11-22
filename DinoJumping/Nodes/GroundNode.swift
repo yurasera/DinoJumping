@@ -1,7 +1,7 @@
 import SpriteKit
 
 final class GroundNode: SKShapeNode {
-    init(width: CGFloat, height: CGFloat) {
+    init(width: CGFloat, height: CGFloat, terrainTexture: SKTexture) {
         super.init()
 
         path = CGPath(
@@ -14,9 +14,12 @@ final class GroundNode: SKShapeNode {
             transform: nil
         )
         name = "ground"
-        fillColor = SKColor(red: 0.16, green: 0.10, blue: 0.30, alpha: 1)
-        strokeColor = SKColor(red: 0.67, green: 0.42, blue: 0.96, alpha: 1)
-        lineWidth = 3
+        // This shape exists only for its physics body. Its fill used to cover
+        // the Terrain sprites that are added below.
+        fillColor = .clear
+        strokeColor = .clear
+
+        addTerrainTiles(width: width, height: height, texture: terrainTexture)
 
         physicsBody = SKPhysicsBody(
             edgeFrom: CGPoint(x: -width / 2, y: height / 2),
@@ -29,5 +32,24 @@ final class GroundNode: SKShapeNode {
 
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
+    }
+
+    private func addTerrainTiles(width: CGFloat, height: CGFloat, texture: SKTexture) {
+        let tileSize: CGFloat = 32
+        let tileCount = Int(ceil(width / tileSize))
+
+        for index in 0..<tileCount {
+            let tile = SKSpriteNode(
+                texture: texture,
+                color: .clear,
+                size: CGSize(width: tileSize, height: tileSize)
+            )
+            tile.position = CGPoint(
+                x: -width / 2 + tileSize / 2 + CGFloat(index) * tileSize,
+                y: height / 2 - tileSize / 2
+            )
+            tile.zPosition = 1
+            addChild(tile)
+        }
     }
 }
