@@ -1,22 +1,16 @@
 import SpriteKit
 
-final class ObstacleNode: SKShapeNode {
-    override init() {
-        super.init()
-
-        path = CGPath(
-            roundedRect: CGRect(x: -19, y: -38, width: 38, height: 76),
-            cornerWidth: 8,
-            cornerHeight: 8,
-            transform: nil
+final class ObstacleNode: SKSpriteNode {
+    init() {
+        super.init(
+            texture: SKTexture(imageNamed: "sawit"),
+            color: .clear,
+            size: CGSize(width: 100, height: 100)
         )
         name = "obstacle"
-        fillColor = SKColor(red: 0.95, green: 0.39, blue: 0.48, alpha: 1)
-        strokeColor = SKColor(red: 1.0, green: 0.72, blue: 0.78, alpha: 1)
-        lineWidth = 3
         zPosition = 1
 
-        physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: 38, height: 76))
+        physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: 70, height: 100))
         physicsBody?.isDynamic = false
         physicsBody?.categoryBitMask = PhysicsCategory.obstacle
         physicsBody?.collisionBitMask = PhysicsCategory.player

@@ -78,7 +78,7 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
             let obstacle = ObstacleNode()
             obstacle.position = CGPoint(
                 x: self.size.width + 50,
-                y: 110
+                y: 122
             )
 
             self.addChild(obstacle)
