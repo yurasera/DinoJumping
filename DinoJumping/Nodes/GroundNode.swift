@@ -35,18 +35,19 @@ final class GroundNode: SKShapeNode {
     }
 
     private func addTerrainTiles(width: CGFloat, height: CGFloat, texture: SKTexture) {
-        let tileSize: CGFloat = 32
-        let tileCount = Int(ceil(width / tileSize))
+        let tileWidth: CGFloat = 32
+        let tileHeight: CGFloat = 32
+        let tileCount = Int(ceil(width / tileWidth))
 
         for index in 0..<tileCount {
             let tile = SKSpriteNode(
                 texture: texture,
                 color: .clear,
-                size: CGSize(width: tileSize, height: tileSize)
+                size: CGSize(width: tileWidth, height: tileHeight)
             )
             tile.position = CGPoint(
-                x: -width / 2 + tileSize / 2 + CGFloat(index) * tileSize,
-                y: height / 2 - tileSize / 2
+                x: -width / 2 + CGFloat(index) * tileWidth + tileWidth / 2,
+                y: height / 2 - tileHeight / 2
             )
             tile.zPosition = 1
             addChild(tile)

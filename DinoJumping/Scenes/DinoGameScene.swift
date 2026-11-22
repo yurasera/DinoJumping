@@ -37,7 +37,12 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
         // Terrain is a 17 × 5 sheet of 32-point tiles. Select its solid
         // grass-platform tile and let GroundNode repeat it across the floor.
         let terrainTile = SKTexture(
-            rect: CGRect(x: 0, y: 0, width: 1.0 / 17.0, height: 1.0 / 5.0),
+            rect: CGRect(
+                x: 1.0 / 17.0,
+                y: 0,
+                width: 1.0 / 17.0,
+                height: 1.0 / 5.0
+            ),
             in: terrainSheet
         )
         terrainTile.filteringMode = .nearest
