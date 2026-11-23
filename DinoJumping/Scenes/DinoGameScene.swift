@@ -140,10 +140,23 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
         )
         terrainTile.filteringMode = .nearest
 
+        // Third tile from the left on the bottom row: a marker before a gap.
+        let preGapTile = SKTexture(
+            rect: CGRect(
+                x: 2.0 / 17.0,
+                y: 0,
+                width: 1.0 / 17.0,
+                height: 1.0 / 5.0
+            ),
+            in: terrainSheet
+        )
+        preGapTile.filteringMode = .nearest
+
         let ground = GroundNode(
             width: size.width * 2,
             height: 72,
-            terrainTexture: terrainTile
+            terrainTexture: terrainTile,
+            preGapTexture: preGapTile
         )
         ground.position = CGPoint(x: size.width / 2, y: 36)
         addChild(ground)

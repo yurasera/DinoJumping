@@ -4,8 +4,17 @@ final class GroundNode: SKShapeNode {
     private let tileSize: CGFloat = 32
     private var terrainTiles: [SKSpriteNode] = []
     private var terrainWidth: CGFloat = 0
+    private var terrainTexture: SKTexture?
+    private var preGapTexture: SKTexture?
 
-    init(width: CGFloat, height: CGFloat, terrainTexture: SKTexture) {
+    init(
+        width: CGFloat,
+        height: CGFloat,
+        terrainTexture: SKTexture,
+        preGapTexture: SKTexture
+    ) {
+        self.terrainTexture = terrainTexture
+        self.preGapTexture = preGapTexture
         super.init()
 
         path = CGPath(
@@ -87,6 +96,7 @@ final class GroundNode: SKShapeNode {
         for (index, tile) in terrainTiles.enumerated() {
             tile.position.x = tileXPosition(for: index)
             tile.isHidden = false
+            tile.texture = terrainTexture
             addGroundPhysics(to: tile)
         }
     }
@@ -99,7 +109,17 @@ final class GroundNode: SKShapeNode {
             .filter { $0.position.x >= rightEdgeInGround }
             .sorted { $0.position.x < $1.position.x }
 
-        tilesAtRightEdge.prefix(count).forEach {
+        let gapTiles = tilesAtRightEdge.prefix(count)
+        guard let firstGapTile = gapTiles.first else { return }
+
+        // Use the third tile from the left in the bottom Terrain row as a
+        // visible marker immediately before the gap.
+        terrainTiles
+            .filter { !$0.isHidden && $0.position.x < firstGapTile.position.x }
+            .max { $0.position.x < $1.position.x }?
+            .texture = preGapTexture
+
+        gapTiles.forEach {
             $0.isHidden = true
             $0.physicsBody = nil
         }
