@@ -91,12 +91,17 @@ final class GroundNode: SKShapeNode {
         }
     }
 
-    func hideSomeTiles() {
-        [8, 27, 46].forEach { startIndex in
-            terrainTiles[startIndex..<(startIndex + 4)].forEach {
-                $0.isHidden = true
-                $0.physicsBody = nil
-            }
+    /// Creates the gap just beyond the right edge, so it scrolls into view
+    /// naturally instead of removing terrain beneath the player.
+    func hideTilesStartingAtRightEdge(sceneWidth: CGFloat, count: Int = 4) {
+        let rightEdgeInGround = sceneWidth / 2
+        let tilesAtRightEdge = terrainTiles
+            .filter { $0.position.x >= rightEdgeInGround }
+            .sorted { $0.position.x < $1.position.x }
+
+        tilesAtRightEdge.prefix(count).forEach {
+            $0.isHidden = true
+            $0.physicsBody = nil
         }
     }
 

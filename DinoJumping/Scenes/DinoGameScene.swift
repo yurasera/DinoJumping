@@ -267,7 +267,7 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
             }
         }
         if score >= 200, !hasRemovedGroundTiles {
-            ground?.hideSomeTiles()
+            ground?.hideTilesStartingAtRightEdge(sceneWidth: size.width)
             hasRemovedGroundTiles = true
         }
         if score > highScore {
