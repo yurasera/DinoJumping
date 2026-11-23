@@ -103,6 +103,8 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
             x: size.width * (0.1 + 0.8 * nightProgress),
             y: size.height * (0.28 + sin(nightProgress * .pi) * 0.55)
         )
+        let moonScale = min(0.5 + nightProgress, 1)
+        moon?.setScale(moonScale)
         moon?.isHidden = hour >= 6 && hour < 18
     }
 
