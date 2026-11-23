@@ -4,9 +4,9 @@ final class GroundNode: SKShapeNode {
     private let tileSize: CGFloat = 32
     private var terrainTiles: [SKSpriteNode] = []
     private var terrainWidth: CGFloat = 0
-    private var terrainTexture: SKTexture?
-    private var preGapTexture: SKTexture?
-    private var postGapTexture: SKTexture?
+    private let terrainTexture: SKTexture
+    private let preGapTexture: SKTexture
+    private let postGapTexture: SKTexture
 
     init(
         width: CGFloat,
@@ -40,7 +40,7 @@ final class GroundNode: SKShapeNode {
     }
 
     required init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
+        fatalError("GroundNode must be created in code")
     }
 
     private func addTerrainTiles(width: CGFloat, height: CGFloat, texture: SKTexture) {
@@ -115,19 +115,16 @@ final class GroundNode: SKShapeNode {
         let gapTiles = tilesAtRightEdge.prefix(count)
         guard let firstGapTile = gapTiles.first else { return }
 
-        // Use the third tile from the left in the bottom Terrain row as a
-        // visible marker immediately before the gap.
-        terrainTiles
+        let tileBeforeGap = terrainTiles
             .filter { !$0.isHidden && $0.position.x < firstGapTile.position.x }
-            .max { $0.position.x < $1.position.x }?
-            .texture = preGapTexture
+            .max { $0.position.x < $1.position.x }
+        tileBeforeGap?.texture = preGapTexture
 
-        if let lastGapTile = gapTiles.last {
-            terrainTiles
-                .filter { !$0.isHidden && $0.position.x > lastGapTile.position.x }
-                .min { $0.position.x < $1.position.x }?
-                .texture = postGapTexture
-        }
+        let lastGapX = gapTiles.last?.position.x ?? firstGapTile.position.x
+        let tileAfterGap = terrainTiles
+            .filter { !$0.isHidden && $0.position.x > lastGapX }
+            .min { $0.position.x < $1.position.x }
+        tileAfterGap?.texture = postGapTexture
 
         gapTiles.forEach {
             $0.isHidden = true
