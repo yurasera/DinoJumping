@@ -18,6 +18,7 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
     private var gameStartTime: TimeInterval?
     private var score = 0
     private var highScore = UserDefaults.standard.integer(forKey: "DinoJumping.highScore")
+    private var gameSpeedMultiplier: CGFloat = 1
 
     override init(size: CGSize) {
         super.init(size: size)
@@ -167,14 +168,20 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
     // Perubahan fix: scroll tile visual, tetapi physics ground tidak ikut bergerak.
     private func startGroundMovement() {
         let obstacleSpeed = (size.width + 100) / 3
-        ground?.startScrolling(speed: obstacleSpeed)
-        clouds.forEach { $0.startScrolling(speed: obstacleSpeed * 0.18, sceneWidth: size.width) }
+        ground?.startScrolling(speed: obstacleSpeed * gameSpeedMultiplier)
+        clouds.forEach {
+            $0.startScrolling(speed: obstacleSpeed * gameSpeedMultiplier * 0.18, sceneWidth: size.width)
+        }
     }
 
     // Perubahan fix: kembalikan posisi tile tanpa mengubah physics ground.
     private func resetGround() {
         ground?.resetScrolling()
-        clouds.forEach { $0.resetScrolling() }
+        ground?.speed = 1
+        clouds.forEach {
+            $0.resetScrolling()
+            $0.speed = 1
+        }
     }
 
     private func addObstacle() {
@@ -201,7 +208,7 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
         addChild(obstacle)
 
         obstacle.run(.sequence([
-            .moveTo(x: -50, duration: 3),
+            .moveTo(x: -50, duration: 3 / gameSpeedMultiplier),
             .removeFromParent()
         ]))
     }
@@ -219,11 +226,12 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
 
         score = 0
         gameStartTime = nil
+        gameSpeedMultiplier = 1
         publishScore()
         canJump = true
         player.physicsBody?.isDynamic = true
         player.physicsBody?.velocity = .zero
-        player.startRunningAnimation()
+        player.startRunningAnimation(speedMultiplier: gameSpeedMultiplier)
 
         startGroundMovement()
         addObstacle()
@@ -241,6 +249,15 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
         guard updatedScore > score else { return }
 
         score = updatedScore
+        if score >= 100, gameSpeedMultiplier == 1 {
+            gameSpeedMultiplier = 1.25
+            player.startRunningAnimation(speedMultiplier: gameSpeedMultiplier)
+            ground?.speed = gameSpeedMultiplier
+            clouds.forEach { $0.speed = gameSpeedMultiplier }
+            enumerateChildNodes(withName: "obstacle") { node, _ in
+                node.speed = self.gameSpeedMultiplier
+            }
+        }
         if score > highScore {
             highScore = score
             UserDefaults.standard.set(highScore, forKey: "DinoJumping.highScore")
