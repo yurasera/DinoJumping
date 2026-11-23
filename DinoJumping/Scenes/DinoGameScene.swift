@@ -1,5 +1,6 @@
 import Foundation
 import SpriteKit
+import UIKit
 
 final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
     private let player = PlayerNode()
@@ -12,6 +13,8 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
     var onGameStateChange: ((GameState) -> Void)?
     var onScoreChange: ((Int, Int) -> Void)?
     private var canJump = true
+    private let jumpHaptic = UIImpactFeedbackGenerator(style: .medium)
+    private let landingHaptic = UIImpactFeedbackGenerator(style: .light)
     private var gameStartTime: TimeInterval?
     private var score = 0
     private var highScore = UserDefaults.standard.integer(forKey: "DinoJumping.highScore")
@@ -29,6 +32,8 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
         backgroundColor = GameViewTheme.spriteKitBackground()
         physicsWorld.gravity = CGVector(dx: 0, dy: -900)
         physicsWorld.contactDelegate = self
+        jumpHaptic.prepare()
+        landingHaptic.prepare()
 
         addMoon()
         addSun()
@@ -273,6 +278,8 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
               player.action(forKey: "jump") == nil else { return }
 
         canJump = false
+        jumpHaptic.impactOccurred()
+        jumpHaptic.prepare()
 
         let groundY = player.position.y
         let jumpHeight: CGFloat = 150
@@ -289,6 +296,8 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
             self?.player.position.y = groundY
             self?.player.physicsBody?.isDynamic = true
             self?.canJump = true
+            self?.landingHaptic.impactOccurred()
+            self?.landingHaptic.prepare()
         }
 
         player.run(.sequence([jump, resumePhysics]), withKey: "jump")
