@@ -1,6 +1,10 @@
 import SpriteKit
 
 final class ObstacleNode: SKSpriteNode {
+    static func nextSpawnDelay() -> TimeInterval {
+        .random(in: 1.5...3.2)
+    }
+
     init() {
         super.init(
             texture: SKTexture(imageNamed: "sawit"),

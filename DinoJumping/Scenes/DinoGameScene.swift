@@ -174,35 +174,31 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
 
     private func addObstacle() {
         removeAction(forKey: "spawnObstacle")
-        
-        let spawn = SKAction.run { [weak self] in
+        spawnObstacle()
+        scheduleNextObstacle()
+    }
+
+    private func scheduleNextObstacle() {
+        let wait = SKAction.wait(forDuration: ObstacleNode.nextSpawnDelay())
+        let schedule = SKAction.run { [weak self] in
             guard let self, self.gameState == .playing else { return }
-
-            let obstacle = ObstacleNode()
-            obstacle.position = CGPoint(
-                x: self.size.width + 50,
-                y: 122
-            )
-
-            self.addChild(obstacle)
-
-            let move = SKAction.moveTo(
-                x: -50,
-                duration: 3
-            )
-
-            obstacle.run(.sequence([
-                move,
-                .removeFromParent()
-            ]))
+            self.spawnObstacle()
+            self.scheduleNextObstacle()
         }
+        run(.sequence([wait, schedule]), withKey: "spawnObstacle")
+    }
 
-        let wait = SKAction.wait(forDuration: 2)
+    private func spawnObstacle() {
+        guard gameState == .playing else { return }
 
-        run(
-            .repeatForever(.sequence([spawn, wait])),
-            withKey: "spawnObstacle"
-        )
+        let obstacle = ObstacleNode()
+        obstacle.position = CGPoint(x: size.width + 50, y: 122)
+        addChild(obstacle)
+
+        obstacle.run(.sequence([
+            .moveTo(x: -50, duration: 3),
+            .removeFromParent()
+        ]))
     }
 
     private func addPlayer() {
