@@ -38,7 +38,7 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
     }
 
     private func addSun() {
-        let sun = SKShapeNode(circleOfRadius: 42)
+        let sun = SKShapeNode(circleOfRadius: 28)
         sun.fillColor = SKColor(red: 1.0, green: 0.72, blue: 0.24, alpha: 1)
         sun.strokeColor = SKColor(red: 1.0, green: 0.91, blue: 0.55, alpha: 1)
         sun.lineWidth = 3
