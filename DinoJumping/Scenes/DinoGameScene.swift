@@ -68,6 +68,11 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
         addChild(moon)
         self.moon = moon
 
+        moon.run(
+            .repeatForever(.rotate(byAngle: -.pi * 2, duration: 90)),
+            withKey: "rotateMoon"
+        )
+
         addMoonCrater(to: moon, position: CGPoint(x: -10, y: 8), radius: 6)
         addMoonCrater(to: moon, position: CGPoint(x: 11, y: -7), radius: 8)
         addMoonCrater(to: moon, position: CGPoint(x: 4, y: 17), radius: 3)
