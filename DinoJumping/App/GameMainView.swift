@@ -98,12 +98,31 @@ private struct JumpButton: View {
                 Spacer()
 
                 Button(action: jump) {
-                    Label("LOMPAT", systemImage: "arrow.up")
+                    Image(systemName: "arrow.up")
+                        .font(.title2.weight(.bold))
+                        .foregroundStyle(.white)
+                        .frame(width: 68, height: 68)
+                        .background(
+                            LinearGradient(
+                                colors: [
+                                    .white.opacity(0.42),
+                                    .white.opacity(0.12)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            in: Circle()
+                        )
+                        .overlay {
+                            Circle()
+                                .stroke(.white.opacity(0.48), lineWidth: 1)
+                        }
+                        .shadow(color: .black.opacity(0.22), radius: 8, y: 4)
                 }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
-                .padding(.trailing, 24)
-                .padding(.bottom, 24)
+                .buttonStyle(.plain)
+                .accessibilityLabel("Lompat")
+                .padding(.trailing, 40)
+                .padding(.bottom, 40)
             }
         }
     }

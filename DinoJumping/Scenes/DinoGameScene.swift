@@ -354,26 +354,6 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
         onScoreChange?(score, highScore)
     }
 
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard let touch = touches.first else { return }
-
-        let touchedNodes = nodes(at: touch.location(in: self))
-
-        if touchedNodes.contains(where: { $0.name == "startButton" }) {
-            startGame()
-            return
-        }
-
-        if touchedNodes.contains(where: { $0.name == "restartButton" }) {
-            restartGame()
-            return
-        }
-
-        if gameState == .playing {
-            jump()
-        }
-    }
-
     func jump() {
         guard gameState == .playing,
               canJump,
