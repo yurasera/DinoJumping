@@ -19,10 +19,13 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
     private var score = 0
     private var highScore = UserDefaults.standard.integer(forKey: "DinoJumping.highScore")
     private var gameSpeedMultiplier: CGFloat = 1
-    private var hasRemovedGroundTiles = false
+    private var nextGroundGapScore = 100
     private var isWaitingToCreateGroundGap = false
     private var groundContactCount = 0
     private let groundGapClearance: CGFloat = 560
+    private let obstacleAfterGapClearance: CGFloat = 840
+    private let groundGapExitPadding: CGFloat = 64
+    private let groundGapScoreInterval = 120
 
     override init(size: CGSize) {
         super.init(size: size)
@@ -206,6 +209,7 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
 
     // Perubahan fix: kembalikan posisi tile tanpa mengubah physics ground.
     private func resetGround() {
+        removeAction(forKey: "restoreGroundGap")
         ground?.resetScrolling()
         ground?.speed = 1
         clouds.forEach {
@@ -250,12 +254,20 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
         }
         guard !hasObstacleTooClose else { return }
 
-        ground?.hideTilesStartingAtRightEdge(sceneWidth: size.width)
-        hasRemovedGroundTiles = true
+        ground?.createGapAtRightEdge(sceneWidth: size.width)
+        nextGroundGapScore = score + groundGapScoreInterval
         isWaitingToCreateGroundGap = false
 
         let scrollSpeed = (size.width + 100) / 3 * gameSpeedMultiplier
-        resumeObstacleSpawning(after: TimeInterval(groundGapClearance / scrollSpeed))
+        restoreGroundGap(after: TimeInterval((size.width + groundGapExitPadding) / scrollSpeed))
+        resumeObstacleSpawning(after: TimeInterval(obstacleAfterGapClearance / scrollSpeed))
+    }
+
+    private func restoreGroundGap(after delay: TimeInterval) {
+        let restore = SKAction.run { [weak self] in
+            self?.ground?.restoreGap()
+        }
+        run(.sequence([.wait(forDuration: delay), restore]), withKey: "restoreGroundGap")
     }
 
     private func spawnObstacle() {
@@ -285,7 +297,7 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
         score = 0
         gameStartTime = nil
         gameSpeedMultiplier = 1
-        hasRemovedGroundTiles = false
+        nextGroundGapScore = 100
         isWaitingToCreateGroundGap = false
         groundContactCount = 0
         publishScore()
@@ -323,7 +335,7 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
                 node.speed = self.gameSpeedMultiplier
             }
         }
-        if score >= 100, !hasRemovedGroundTiles {
+        if score >= nextGroundGapScore {
             if !isWaitingToCreateGroundGap {
                 // Do not introduce a new obstacle while reserving a safe gap.
                 removeAction(forKey: "spawnObstacle")
@@ -423,6 +435,7 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
         publishScore()
 
         removeAction(forKey: "spawnObstacle")
+        removeAction(forKey: "restoreGroundGap")
         ground?.stopScrolling()
         clouds.forEach { $0.stopScrolling() }
 

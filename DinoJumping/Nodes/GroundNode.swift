@@ -9,6 +9,8 @@ final class GroundNode: SKShapeNode {
     private let terrainTexture: SKTexture
     private let preGapTexture: SKTexture
     private let postGapTexture: SKTexture
+    private var gapTiles: [SKSpriteNode] = []
+    private var gapMarkerTiles: [SKSpriteNode] = []
 
     init(
         width: CGFloat,
@@ -97,6 +99,8 @@ final class GroundNode: SKShapeNode {
 
     func resetScrolling() {
         stopScrolling()
+        gapTiles.removeAll()
+        gapMarkerTiles.removeAll()
 
         for (index, tile) in terrainTiles.enumerated() {
             tile.position.x = tileXPosition(for: index)
@@ -106,9 +110,8 @@ final class GroundNode: SKShapeNode {
         }
     }
 
-    /// Creates the gap just beyond the right edge, so it scrolls into view
-    /// naturally instead of removing terrain beneath the player.
-    func hideTilesStartingAtRightEdge(sceneWidth: CGFloat, count: Int = 4) {
+    /// Creates one gap just beyond the right edge, so it scrolls into view naturally.
+    func createGapAtRightEdge(sceneWidth: CGFloat, count: Int = 4) {
         let rightEdgeInGround = sceneWidth / 2
         let tilesAtRightEdge = terrainTiles
             .filter { $0.position.x >= rightEdgeInGround }
@@ -132,6 +135,22 @@ final class GroundNode: SKShapeNode {
             $0.isHidden = true
             $0.physicsBody = nil
         }
+
+        self.gapTiles = Array(gapTiles)
+        gapMarkerTiles = [tileBeforeGap, tileAfterGap].compactMap { $0 }
+    }
+
+    /// Restores the tiles after the gap has left the screen, preventing it from
+    /// looping back and overlapping a later obstacle.
+    func restoreGap() {
+        gapTiles.forEach {
+            $0.isHidden = false
+            $0.texture = terrainTexture
+            addGroundPhysics(to: $0)
+        }
+        gapMarkerTiles.forEach { $0.texture = terrainTexture }
+        gapTiles.removeAll()
+        gapMarkerTiles.removeAll()
     }
 
     private func addGroundPhysics(to tile: SKSpriteNode) {
