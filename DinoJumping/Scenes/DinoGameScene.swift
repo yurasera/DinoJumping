@@ -19,6 +19,8 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
     private var score = 0
     private var highScore = UserDefaults.standard.integer(forKey: "DinoJumping.highScore")
     private var gameSpeedMultiplier: CGFloat = 1
+    private var hasRemovedGroundTiles = false
+    private var groundContactCount = 0
 
     override init(size: CGSize) {
         super.init(size: size)
@@ -227,6 +229,8 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
         score = 0
         gameStartTime = nil
         gameSpeedMultiplier = 1
+        hasRemovedGroundTiles = false
+        groundContactCount = 0
         publishScore()
         canJump = true
         player.physicsBody?.isDynamic = true
@@ -245,6 +249,10 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
         }
 
         guard let gameStartTime else { return }
+        if player.position.y < -80 {
+            showGameOver()
+            return
+        }
         let updatedScore = Int((currentTime - gameStartTime) * 10)
         guard updatedScore > score else { return }
 
@@ -257,6 +265,10 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
             enumerateChildNodes(withName: "obstacle") { node, _ in
                 node.speed = self.gameSpeedMultiplier
             }
+        }
+        if score >= 200, !hasRemovedGroundTiles {
+            ground?.hideSomeTiles()
+            hasRemovedGroundTiles = true
         }
         if score > highScore {
             highScore = score
@@ -312,7 +324,6 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
         let resumePhysics = SKAction.run { [weak self] in
             self?.player.position.y = groundY
             self?.player.physicsBody?.isDynamic = true
-            self?.canJump = true
             self?.landingHaptic.impactOccurred()
             self?.landingHaptic.prepare()
         }
@@ -324,6 +335,7 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
         let names = [contact.bodyA.node?.name, contact.bodyB.node?.name]
 
         if names.contains("ground") {
+            groundContactCount += 1
             canJump = true
         }
 
@@ -336,7 +348,8 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
         let names = [contact.bodyA.node?.name, contact.bodyB.node?.name]
 
         if names.contains("ground") {
-            canJump = false
+            groundContactCount = max(groundContactCount - 1, 0)
+            canJump = groundContactCount > 0
         }
     }
     

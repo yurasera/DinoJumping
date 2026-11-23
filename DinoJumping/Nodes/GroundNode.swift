@@ -25,13 +25,6 @@ final class GroundNode: SKShapeNode {
 
         addTerrainTiles(width: width, height: height, texture: terrainTexture)
 
-        physicsBody = SKPhysicsBody(
-            edgeFrom: CGPoint(x: -width / 2, y: height / 2),
-            to: CGPoint(x: width / 2, y: height / 2)
-        )
-        physicsBody?.isDynamic = false
-        physicsBody?.categoryBitMask = PhysicsCategory.ground
-        physicsBody?.collisionBitMask = PhysicsCategory.player
     }
 
     required init?(coder aDecoder: NSCoder) {
@@ -52,7 +45,9 @@ final class GroundNode: SKShapeNode {
                 x: tileXPosition(for: index),
                 y: height / 2 - tileSize / 2
             )
+            tile.name = "ground"
             tile.zPosition = 1
+            addGroundPhysics(to: tile)
             addChild(tile)
             terrainTiles.append(tile)
         }
@@ -91,7 +86,29 @@ final class GroundNode: SKShapeNode {
 
         for (index, tile) in terrainTiles.enumerated() {
             tile.position.x = tileXPosition(for: index)
+            tile.isHidden = false
+            addGroundPhysics(to: tile)
         }
+    }
+
+    func hideSomeTiles() {
+        [8, 27, 46].forEach { startIndex in
+            terrainTiles[startIndex..<(startIndex + 4)].forEach {
+                $0.isHidden = true
+                $0.physicsBody = nil
+            }
+        }
+    }
+
+    private func addGroundPhysics(to tile: SKSpriteNode) {
+        tile.physicsBody = SKPhysicsBody(
+            edgeFrom: CGPoint(x: -tileSize / 2, y: tileSize / 2),
+            to: CGPoint(x: tileSize / 2, y: tileSize / 2)
+        )
+        tile.physicsBody?.isDynamic = false
+        tile.physicsBody?.categoryBitMask = PhysicsCategory.ground
+        tile.physicsBody?.collisionBitMask = PhysicsCategory.player
+        tile.physicsBody?.contactTestBitMask = PhysicsCategory.player
     }
 
     private func tileXPosition(for index: Int) -> CGFloat {
