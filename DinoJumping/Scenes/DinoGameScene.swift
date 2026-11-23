@@ -20,7 +20,9 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
     private var highScore = UserDefaults.standard.integer(forKey: "DinoJumping.highScore")
     private var gameSpeedMultiplier: CGFloat = 1
     private var hasRemovedGroundTiles = false
+    private var isWaitingToCreateGroundGap = false
     private var groundContactCount = 0
+    private let groundGapClearance: CGFloat = 560
 
     override init(size: CGSize) {
         super.init(size: size)
@@ -202,6 +204,34 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
         run(.sequence([wait, schedule]), withKey: "spawnObstacle")
     }
 
+    private func resumeObstacleSpawning(after delay: TimeInterval) {
+        let resume = SKAction.run { [weak self] in
+            guard let self, self.gameState == .playing else { return }
+            self.spawnObstacle()
+            self.scheduleNextObstacle()
+        }
+        run(.sequence([.wait(forDuration: delay), resume]), withKey: "spawnObstacle")
+    }
+
+    private func createGroundGapWhenClear() {
+        guard isWaitingToCreateGroundGap else { return }
+
+        var hasObstacleTooClose = false
+        enumerateChildNodes(withName: "obstacle") { node, _ in
+            if node.position.x > self.size.width - self.groundGapClearance {
+                hasObstacleTooClose = true
+            }
+        }
+        guard !hasObstacleTooClose else { return }
+
+        ground?.hideTilesStartingAtRightEdge(sceneWidth: size.width)
+        hasRemovedGroundTiles = true
+        isWaitingToCreateGroundGap = false
+
+        let scrollSpeed = (size.width + 100) / 3 * gameSpeedMultiplier
+        resumeObstacleSpawning(after: TimeInterval(groundGapClearance / scrollSpeed))
+    }
+
     private func spawnObstacle() {
         guard gameState == .playing else { return }
 
@@ -230,6 +260,7 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
         gameStartTime = nil
         gameSpeedMultiplier = 1
         hasRemovedGroundTiles = false
+        isWaitingToCreateGroundGap = false
         groundContactCount = 0
         publishScore()
         canJump = true
@@ -266,9 +297,13 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
                 node.speed = self.gameSpeedMultiplier
             }
         }
-        if score >= 200, !hasRemovedGroundTiles {
-            ground?.hideTilesStartingAtRightEdge(sceneWidth: size.width)
-            hasRemovedGroundTiles = true
+        if score >= 100, !hasRemovedGroundTiles {
+            if !isWaitingToCreateGroundGap {
+                // Do not introduce a new obstacle while reserving a safe gap.
+                removeAction(forKey: "spawnObstacle")
+                isWaitingToCreateGroundGap = true
+            }
+            createGroundGapWhenClear()
         }
         if score > highScore {
             highScore = score
