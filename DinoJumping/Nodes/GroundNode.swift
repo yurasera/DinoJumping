@@ -6,15 +6,18 @@ final class GroundNode: SKShapeNode {
     private var terrainWidth: CGFloat = 0
     private var terrainTexture: SKTexture?
     private var preGapTexture: SKTexture?
+    private var postGapTexture: SKTexture?
 
     init(
         width: CGFloat,
         height: CGFloat,
         terrainTexture: SKTexture,
-        preGapTexture: SKTexture
+        preGapTexture: SKTexture,
+        postGapTexture: SKTexture
     ) {
         self.terrainTexture = terrainTexture
         self.preGapTexture = preGapTexture
+        self.postGapTexture = postGapTexture
         super.init()
 
         path = CGPath(
@@ -118,6 +121,13 @@ final class GroundNode: SKShapeNode {
             .filter { !$0.isHidden && $0.position.x < firstGapTile.position.x }
             .max { $0.position.x < $1.position.x }?
             .texture = preGapTexture
+
+        if let lastGapTile = gapTiles.last {
+            terrainTiles
+                .filter { !$0.isHidden && $0.position.x > lastGapTile.position.x }
+                .min { $0.position.x < $1.position.x }?
+                .texture = postGapTexture
+        }
 
         gapTiles.forEach {
             $0.isHidden = true
