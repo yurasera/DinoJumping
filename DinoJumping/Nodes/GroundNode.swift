@@ -2,6 +2,8 @@ import SpriteKit
 
 final class GroundNode: SKShapeNode {
     private let tileSize: CGFloat = 32
+    // Adjacent tiles overlap by one point to prevent hairline seams while scrolling.
+    private let tileOverlap: CGFloat = 1
     private var terrainTiles: [SKSpriteNode] = []
     private var terrainWidth: CGFloat = 0
     private let terrainTexture: SKTexture
@@ -51,7 +53,7 @@ final class GroundNode: SKShapeNode {
             let tile = SKSpriteNode(
                 texture: texture,
                 color: .clear,
-                size: CGSize(width: tileSize, height: tileSize)
+                size: CGSize(width: tileSize + tileOverlap, height: tileSize)
             )
             tile.position = CGPoint(
                 x: tileXPosition(for: index),
@@ -134,8 +136,8 @@ final class GroundNode: SKShapeNode {
 
     private func addGroundPhysics(to tile: SKSpriteNode) {
         tile.physicsBody = SKPhysicsBody(
-            edgeFrom: CGPoint(x: -tileSize / 2, y: tileSize / 2),
-            to: CGPoint(x: tileSize / 2, y: tileSize / 2)
+            edgeFrom: CGPoint(x: -tileSize / 2 - tileOverlap / 2, y: tileSize / 2),
+            to: CGPoint(x: tileSize / 2 + tileOverlap / 2, y: tileSize / 2)
         )
         tile.physicsBody?.isDynamic = false
         tile.physicsBody?.categoryBitMask = PhysicsCategory.ground
