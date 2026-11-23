@@ -19,7 +19,7 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
     private var score = 0
     private var highScore = UserDefaults.standard.integer(forKey: "DinoJumping.highScore")
     private var gameSpeedMultiplier: CGFloat = 1
-    private var nextGroundGapScore = 100
+    private var nextGroundGapScore = 500
     private var isWaitingToCreateGroundGap = false
     private var groundContactCount = 0
     private let groundGapClearance: CGFloat = 560
@@ -297,7 +297,7 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
         score = 0
         gameStartTime = nil
         gameSpeedMultiplier = 1
-        nextGroundGapScore = 100
+        nextGroundGapScore = 500
         isWaitingToCreateGroundGap = false
         groundContactCount = 0
         publishScore()
@@ -326,7 +326,7 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
         guard updatedScore > score else { return }
 
         score = updatedScore
-        if score >= 100, gameSpeedMultiplier == 1 {
+        if score >= 1000, gameSpeedMultiplier == 1 {
             gameSpeedMultiplier = 1.25
             player.startRunningAnimation(speedMultiplier: gameSpeedMultiplier)
             ground?.speed = gameSpeedMultiplier
