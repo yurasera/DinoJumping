@@ -57,6 +57,30 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
         sun.strokeColor = SKColor(red: 1.0, green: 0.91, blue: 0.55, alpha: 1)
         sun.lineWidth = 3
         sun.glowWidth = 8
+
+        // Glow and zoom animation.
+        let glowUp = SKAction.customAction(withDuration: 1.5) { node, progress in
+            let value = progress / 1.5
+            (node as? SKShapeNode)?.glowWidth = 8 + (value * 8)
+        }
+
+        let glowDown = SKAction.customAction(withDuration: 1.5) { node, progress in
+            let value = progress / 1.5
+            (node as? SKShapeNode)?.glowWidth = 16 - (value * 8)
+        }
+
+        let zoomIn = SKAction.scale(to: 1.08, duration: 1.5)
+        let zoomOut = SKAction.scale(to: 1.0, duration: 1.5)
+
+        sun.run(
+            .repeatForever(
+                .sequence([
+                    .group([glowUp, zoomIn]),
+                    .group([glowDown, zoomOut])
+                ])
+            ),
+            withKey: "sunGlowPulse"
+        )
         sun.position = CGPoint(x: size.width * 0.82, y: size.height * 0.78)
         sun.zPosition = -1
         addChild(sun)
