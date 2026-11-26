@@ -52,6 +52,7 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
 
     private func addSun() {
         let sun = SKShapeNode(circleOfRadius: 28)
+        sun.setScale(0.5)
         sun.fillColor = SKColor(red: 1.0, green: 0.72, blue: 0.24, alpha: 1)
         sun.strokeColor = SKColor(red: 1.0, green: 0.91, blue: 0.55, alpha: 1)
         sun.lineWidth = 3
@@ -106,12 +107,16 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
         let hour = CGFloat(time.hour ?? 0)
             + CGFloat(time.minute ?? 0) / 60
             + CGFloat(time.second ?? 0) / 3_600
-        let daylightProgress = min(max((hour - 6) / 12, 0), 1)
+        let daylightProgress = min(max((hour - 6) / 6, 0), 1)
 
         sun?.position = CGPoint(
             x: size.width * (0.1 + 0.8 * daylightProgress),
             y: size.height * (0.28 + sin(daylightProgress * .pi) * 0.55)
         )
+
+        // Sun grows from 50% to 100% before 12 PM.
+        let sunScale = 0.5 + (daylightProgress * 0.5)
+        sun?.setScale(sunScale)
         sun?.isHidden = hour < 6 || hour >= 18
 
         let nightProgress = hour >= 18
