@@ -19,13 +19,13 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
     private var score = 0
     private var highScore = UserDefaults.standard.integer(forKey: "DinoJumping.highScore")
     private var gameSpeedMultiplier: CGFloat = 1
-    private var nextGroundGapScore = 500
+    private var nextGroundGapScore = 100
     private var isWaitingToCreateGroundGap = false
     private var groundContactCount = 0
     private let groundGapClearance: CGFloat = 560
     private let obstacleAfterGapClearance: CGFloat = 840
     private let groundGapExitPadding: CGFloat = 64
-    private let groundGapScoreInterval = 120
+    private let groundGapScoreInterval = 60
 
     override init(size: CGSize) {
         super.init(size: size)
@@ -326,7 +326,7 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
         score = 0
         gameStartTime = nil
         gameSpeedMultiplier = 1
-        nextGroundGapScore = 500
+        nextGroundGapScore = 200
         isWaitingToCreateGroundGap = false
         groundContactCount = 0
         publishScore()
