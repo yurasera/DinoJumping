@@ -19,7 +19,7 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
     private var score = 0
     private var highScore = UserDefaults.standard.integer(forKey: "DinoJumping.highScore")
     private var gameSpeedMultiplier: CGFloat = 1
-    private var nextGroundGapScore = 100
+    private var nextGroundGapScore = 200
     private var isWaitingToCreateGroundGap = false
     private var groundContactCount = 0
     private let groundGapClearance: CGFloat = 560
@@ -302,12 +302,24 @@ final class DinoGameScene: SKScene, SKPhysicsContactDelegate {
     private func spawnObstacle() {
         guard gameState == .playing else { return }
 
-        let obstacle = ObstacleNode()
-        obstacle.position = CGPoint(x: size.width + 50, y: 122)
+        let isFireball = Bool.random()
+        let obstacle: SKNode
+        let obstacleY: CGFloat
+
+        if isFireball {
+            obstacle = FireballNode()
+            obstacleY = CGFloat.random(in: 170...220)
+        } else {
+            obstacle = ObstacleNode()
+            obstacleY = 122
+        }
+
+        obstacle.name = "obstacle"
+        obstacle.position = CGPoint(x: size.width + 50, y: obstacleY)
         addChild(obstacle)
 
         obstacle.run(.sequence([
-            .moveTo(x: -50, duration: 3 / gameSpeedMultiplier),
+            .moveTo(x: -80, duration: 3 / gameSpeedMultiplier),
             .removeFromParent()
         ]))
     }
