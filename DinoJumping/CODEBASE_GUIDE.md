@@ -1,6 +1,6 @@
 # Panduan Membaca Codebase DinoJumping
 
-Project ini memakai struktur sederhana. Tidak ada MVVM tambahan karena `SKScene` sudah menjadi tempat yang tepat untuk game loop, physics, collision, dan state game.
+Dokumen ini mengikuti struktur proyek yang saat ini digunakan. DinoJumping memakai SwiftUI sebagai lapisan tampilan dan SpriteKit sebagai mesin game. `DinoGameScene` menangani game loop, pergerakan, physics, collision, skor, serta lifecycle permainan.
 
 ## Struktur folder
 
@@ -8,336 +8,391 @@ Project ini memakai struktur sederhana. Tidak ada MVVM tambahan karena `SKScene`
 DinoJumping/
 ├── App/
 │   ├── App.swift
-│   └── MainView.swift
-└── Game/
-    ├── Game.swift
-    ├── Background.swift
-    ├── Player.swift
-    ├── HUD.swift
-    ├── Overlay.swift
-    ├── Flow.swift
-    └── Obstacles.swift
+│   └── GameMainView.swift
+├── Configuration/
+│   ├── GameState.swift
+│   ├── GameViewTheme.swift
+│   └── PhysicsCategory.swift
+├── Nodes/
+│   ├── CloudNode.swift
+│   ├── FireballNode.swift
+│   ├── GroundNode.swift
+│   ├── ObstacleNode.swift
+│   └── PlayerNode.swift
+├── Scenes/
+│   └── DinoGameScene.swift
+├── UI/
+│   └── GameOverlay.swift
+├── Assets.xcassets
+└── CODEBASE_GUIDE.md
 ```
 
-Setiap file Game memiliki satu tanggung jawab utama.
+## Tanggung jawab tiap folder
 
-## Urutan membaca
+| Folder | Tanggung jawab |
+| --- | --- |
+| `App/` | Entry point aplikasi dan komposisi tampilan SwiftUI dengan SpriteKit. |
+| `Configuration/` | State permainan, kategori physics, dan tema warna background. |
+| `Nodes/` | Node SpriteKit yang dapat digunakan oleh scene: player, ground, cloud, dan obstacle. |
+| `Scenes/` | Scene utama dan koordinasi seluruh gameplay. |
+| `UI/` | Overlay SwiftUI untuk state awal dan game over. |
+| `Assets.xcassets` | Asset visual yang digunakan oleh node dan tampilan game. |
+
+## Urutan membaca yang disarankan
+
+1. `App/App.swift`
+2. `Configuration/GameState.swift`
+3. `Configuration/PhysicsCategory.swift`
+4. `Configuration/GameViewTheme.swift`
+5. `App/GameMainView.swift`
+6. `UI/GameOverlay.swift`
+7. `Nodes/PlayerNode.swift`
+8. `Nodes/GroundNode.swift`
+9. `Nodes/CloudNode.swift`
+10. `Nodes/ObstacleNode.swift`
+11. `Nodes/FireballNode.swift`
+12. `Scenes/DinoGameScene.swift`
+
+Urutan ini dimulai dari entry point dan kontrak dasar, kemudian UI, node individual, dan terakhir orkestrasi gameplay.
+
+## Lapisan aplikasi
+
+### `App/App.swift`
+
+Entry point SwiftUI. `WindowGroup` menampilkan `GameMainView`.
 
 ```text
-1. App/App.swift
-2. App/MainView.swift
-3. Game/Game.swift
-4. Game/Background.swift
-5. Game/Player.swift
-6. Game/Flow.swift
-7. Game/Obstacles.swift
-8. Game/HUD.swift
-9. Game/Overlay.swift
-```
-
-## Folder App
-
-### App/App.swift
-
-Entry point aplikasi. File ini membuka `MainView`.
-
-```text
-App
+DinoJumpingApp
   └── WindowGroup
-        └── MainView
+        └── GameMainView
 ```
 
-### App/MainView.swift
+### `App/GameMainView.swift`
 
-Menghubungkan SwiftUI dengan SpriteKit.
+Menghubungkan SwiftUI dengan `DinoGameScene`.
+
+Tanggung jawab utama:
+
+- Membuat scene berukuran awal 900 × 500.
+- Menampilkan background dinamis melalui `TimelineView` dan `GameViewTheme`.
+- Menampilkan scene SpriteKit melalui `SpriteView`.
+- Menampilkan skor dan high score.
+- Menampilkan tombol lompat ketika permainan aktif.
+- Menampilkan `GameOverlay` ketika state masih `ready` atau sudah `gameOver`.
+- Menerima callback perubahan state dan skor dari scene.
+- Membaca high score dari `UserDefaults` dengan key `DinoJumping.highScore`.
+
+Alur komponen tampilannya:
 
 ```text
-MainView
-  ├── SpriteView
-  │     └── DinoGameScene
-  └── Button "MULAI / LOMPAT"
-        └── gameScene.jump()
+GameMainView
+├── TimelineView
+│   └── GameViewTheme.background(for:)
+├── SpriteView
+│   └── DinoGameScene
+├── ScoreBoard
+├── JumpButton              jika state = playing
+└── GameOverlay             jika state = ready atau gameOver
 ```
 
-Satu tombol memiliki tiga perilaku:
+## Konfigurasi
+
+### `Configuration/GameState.swift`
+
+Mendefinisikan tiga state permainan:
 
 ```text
-ready    → mulai game
-playing  → lompat
-gameOver → mulai ulang
-```
-
-## Game/Game.swift
-
-Ini adalah file utama scene. Isinya hanya pengatur umum:
-
-- State game
-- Physics category
-- Konfigurasi game
-- Object utama seperti player, label, dan overlay
-- Lifecycle SpriteKit
-- Game loop
-- Input
-- Collision
-
-### State game
-
-```swift
 ready → playing → gameOver
-  ↑                 │
-  └─────────────────┘
-       tekan tombol
+  ↑                    │
+  └──── restart ───────┘
 ```
 
-### Lifecycle
+- `ready`: permainan belum dimulai.
+- `playing`: game loop aktif dan player dapat melompat.
+- `gameOver`: permainan berhenti setelah player jatuh atau terkena obstacle.
 
-`didMove(to:)` dipanggil saat scene tampil. Fungsi ini memanggil fungsi pembuat object dari file lain.
+### `Configuration/PhysicsCategory.swift`
 
-### Game loop
+Menyediakan bit mask untuk collision SpriteKit:
 
-`update(_:)` dipanggil berulang kali oleh SpriteKit.
+| Kategori | Nilai | Kegunaan |
+| --- | --- | --- |
+| `player` | `1 << 0` | Physics body Dino. |
+| `ground` | `1 << 1` | Physics body tanah. |
+| `obstacle` | `1 << 2` | Obstacle dan fireball. |
 
-```text
-update()
-  ├── berhenti jika state bukan playing
-  ├── menghitung waktu
-  ├── memperbarui skor
-  ├── menggerakkan rintangan
-  └── membuat rintangan baru
-```
+Kategori ini dipakai oleh `PlayerNode`, `GroundNode`, `ObstacleNode`, `FireballNode`, dan `DinoGameScene`.
 
-## Game/Background.swift
+### `Configuration/GameViewTheme.swift`
 
-Mengurus semua object background:
+Menyediakan warna langit berdasarkan waktu saat ini.
 
-- Sky
-- Stars
-- Ground
-- Ground line
-- Ground physics
+- `background(for:)` mengembalikan warna SwiftUI.
+- `spriteKitBackground(for:)` mengembalikan warna SpriteKit.
+- Warna bertransisi antara malam, pagi, siang, dan sore.
+- Fungsi internal `blend(from:to:progress:)` melakukan interpolasi warna.
 
-Fungsi utama:
+## Node SpriteKit
+
+### `Nodes/PlayerNode.swift`
+
+Mewakili Dino sebagai `SKSpriteNode`.
+
+Tanggung jawab:
+
+- Memuat asset sprite sheet `dino`.
+- Memotong sprite sheet menjadi 8 frame horizontal.
+- Membuat physics body player.
+- Menonaktifkan rotasi player.
+- Menetapkan collision dan contact mask.
+- Menjalankan animasi lari berulang.
+
+Fungsi penting:
 
 | Fungsi | Tugas |
 | --- | --- |
-| `createBackground()` | Membuat background utama |
-| `addStars()` | Membuat bintang |
-| `addGround()` | Membuat tanah dan physics ground |
+| `init()` | Membuat sprite dan physics player. |
+| `texture(forFrame:)` | Mengambil satu frame dari sprite sheet. |
+| `startRunningAnimation(speedMultiplier:)` | Menjalankan animasi lari 8 frame. |
 
-## Game/Player.swift
+Player dibuat tidak dinamis saat inisialisasi. Scene mengaktifkan physics saat `startGame()`.
 
-Mengurus semua hal yang berhubungan dengan Dino:
+### `Nodes/GroundNode.swift`
 
-- Sprite player
-- Texture sprite sheet
-- Physics player
-- Idle frame
-- Animasi lari
+Mewakili tanah dan visual terrain yang dapat bergerak.
 
-Fungsi utama:
+Tanggung jawab:
 
-| Fungsi | Tugas |
-| --- | --- |
-| `createPlayer()` | Membuat Dino dan physics |
-| `dinoTexture(frame:)` | Mengambil satu frame dari `dino.png` |
-| `startIdleAnimation()` | Menampilkan frame idle diam |
-| `startPlayerRunning()` | Memutar 8 frame animasi lari |
-| `stopPlayerRunning()` | Menghentikan animasi dan kembali ke idle |
+- Mengulang tile terrain sepanjang lantai.
+- Menambahkan physics body ground pada tile.
+- Menggeser tile secara horizontal.
+- Mengembalikan posisi tile saat restart.
+- Membuat dan memulihkan gap tanah pada skor tertentu.
 
-Player dibuat diam sebelum mulai:
-
-```swift
-player.physicsBody?.isDynamic = false
-```
-
-Physics diaktifkan di `startGame()`.
-
-## Game/Flow.swift
-
-Mengurus alur permainan:
-
-- Lompat
-- Mulai game
-- Game over
-- Start/stop animasi player
-- Perhitungan skor
-
-Fungsi utama:
+Fungsi penting:
 
 | Fungsi | Tugas |
 | --- | --- |
-| `jump()` | Memulai, melompat, atau mengulang game |
-| `startGame()` | Mereset dan menjalankan game |
-| `endGame()` | Menghentikan game setelah collision |
-| `updateScore()` | Menghitung skor dan kecepatan |
+| `startScrolling(speed:)` | Memulai pergerakan visual tanah. |
+| `stopScrolling()` | Menghentikan pergerakan tanah. |
+| `resetScrolling()` | Mengembalikan tile ke posisi awal. |
+| `createGapAtRightEdge(sceneWidth:count:)` | Membuat celah di sisi kanan lantai. |
+| `restoreGap()` | Mengembalikan tile yang dihilangkan. |
 
-## Game/Obstacles.swift
+Physics ground tetap berada pada node tile, sehingga pergerakan visual dan collision dapat dikontrol secara terpisah.
 
-Mengurus semua rintangan:
+### `Nodes/CloudNode.swift`
 
-- Spawn timer
-- Pergerakan rintangan
-- Kaktus
-- Burung
-- Physics rintangan
+Mewakili satu awan yang bergerak sebagai dekorasi foreground.
 
-Fungsi utama:
+- Menggunakan asset cloud yang diberikan oleh scene.
+- Menyimpan posisi awal untuk kebutuhan reset.
+- Bergerak horizontal dan wrap kembali ke sisi kanan.
+- Berada di depan matahari dan bulan melalui `zPosition`.
+
+### `Nodes/ObstacleNode.swift`
+
+Mewakili obstacle berbasis sprite.
+
+- Memilih salah satu rangkaian frame asset `sawit` secara acak.
+- Memiliki physics body statis.
+- Menggunakan nama node `obstacle`.
+- Memutar animasi obstacle.
+- Menyediakan delay spawn acak melalui `nextSpawnDelay()`.
+
+### `Nodes/FireballNode.swift`
+
+Mewakili obstacle fireball berbasis `SKShapeNode`, bukan image asset.
+
+- Terdiri dari glow luar, bola api, core, dan flame.
+- Menggunakan physics body berbentuk lingkaran.
+- Memakai kategori physics `obstacle`.
+- Memiliki animasi pulse agar terlihat menyala.
+
+## Scene utama
+
+### `Scenes/DinoGameScene.swift`
+
+Ini adalah pusat koordinasi game. Scene mewarisi `SKScene` dan mengimplementasikan `SKPhysicsContactDelegate`.
+
+State dan data utama yang dikelola:
+
+- `gameState`
+- `score` dan `highScore`
+- `gameStartTime`
+- `gameSpeedMultiplier`
+- `canJump`
+- `groundContactCount`
+- `ground`, `player`, `clouds`, `sun`, dan `moon`
+- Jadwal pembuatan obstacle dan gap ground
+
+Scene mengirim perubahan ke SwiftUI melalui dua callback:
+
+```swift
+var onGameStateChange: ((GameState) -> Void)?
+var onScoreChange: ((Int, Int) -> Void)?
+```
+
+### Setup scene
+
+Saat scene ditampilkan, scene menyiapkan:
+
+1. Background SpriteKit.
+2. Matahari dan bulan.
+3. Ground berbasis tile.
+4. Awan.
+5. Player.
+6. Physics contact delegate.
+
+Fungsi setup yang relevan:
+
+- `addSun()`
+- `addMoon()`
+- `addMoonCrater(to:position:radius:)`
+- `updateSunPosition()`
+- `addGround()`
+- `addClouds()`
+- `addPlayer()`
+
+### Siklus permainan
+
+```text
+GameMainView
+  ↓
+GameOverlay menekan MULAI
+  ↓
+DinoGameScene.startGame()
+  ↓
+state = playing
+  ↓
+player, ground, dan cloud mulai bergerak
+  ↓
+obstacle dibuat berkala
+  ↓
+update(_:) memperbarui waktu dan skor
+  ↓
+jump() membuat player melompat
+  ↓
+collision atau jatuh memanggil showGameOver()
+  ↓
+GameOverlay menampilkan GAME OVER
+  ↓
+restartGame() menghapus obstacle dan memulai ulang
+```
+
+### Fungsi gameplay penting
 
 | Fungsi | Tugas |
 | --- | --- |
-| `getDeltaTime()` | Menghitung waktu antar-frame |
-| `createObstacleWhenNeeded()` | Menentukan waktu spawn |
-| `moveObstacles()` | Menggerakkan rintangan |
-| `createObstacle()` | Memilih kaktus atau burung |
-| `createCactus()` | Membuat kaktus |
-| `createBird()` | Membuat burung |
-| `addObstaclePhysics()` | Menambahkan physics |
-| `removeObstacles()` | Menghapus rintangan saat reset |
+| `startGame()` | Mengatur state aktif, mereset skor, mengaktifkan physics player, dan memulai pergerakan. |
+| `update(_:)` | Menghitung skor, meningkatkan kecepatan pada skor 1000, dan menjadwalkan gap ground. |
+| `jump()` | Menjalankan lompatan berbentuk arc dan haptic feedback saat lepas landas serta mendarat. |
+| `publishScore()` | Mengirim skor dan high score ke SwiftUI. |
+| `didBegin(_:)` | Mendeteksi kontak dengan ground atau obstacle. |
+| `didEnd(_:)` | Memperbarui status kontak player dengan ground. |
+| `showGameOver()` | Menghentikan seluruh gerakan dan mengubah state menjadi `gameOver`. |
+| `restartGame()` | Menghapus obstacle, mereset posisi, mereset ground, lalu memanggil `startGame()`. |
 
-## Game/HUD.swift
+### Spawn obstacle
 
-Mengurus skor dan best score:
+`spawnObstacle()` memilih obstacle secara acak:
 
-- Label score
-- Label best score
-- Menampilkan teks skor
+- `FireballNode` dengan posisi vertikal acak.
+- `ObstacleNode` pada jalur tanah.
 
-Fungsi utama:
+Obstacle bergerak dari sisi kanan ke kiri dan dihapus setelah keluar dari scene. Saat ground gap akan dibuat, scene menunggu sampai area kanan cukup aman, menghentikan spawn sementara, lalu mengaktifkan kembali spawn setelah gap dilewati.
 
-- `createHUD()`
-- `updateScoreLabels()`
+### Skor dan kesulitan
 
-## Game/Overlay.swift
+- Skor dihitung dari durasi permainan aktif.
+- High score disimpan di `UserDefaults`.
+- Pada skor 1000, `gameSpeedMultiplier` berubah dari 1 menjadi 1.25.
+- Kecepatan player, ground, cloud, dan obstacle disesuaikan dengan multiplier.
+- Gap ground dibuat secara berkala mulai dari skor 200 dengan interval skor 60.
 
-Mengurus panel informasi awal dan game over.
+## UI
 
-Fungsi utama:
+### `UI/GameOverlay.swift`
 
-- `showOverlay(title:message:)`
-- `addOverlayLabel(...)`
+Overlay SwiftUI yang ditampilkan ketika game belum aktif.
 
-## Toggle untuk belajar
+Untuk state `ready`, overlay menampilkan:
 
-Toggle berada di bagian atas `Game.swift`:
+- Judul DINO JUMPING.
+- Instruksi menghindari obstacle.
+- High score.
+- Tombol `MULAI`.
 
-```swift
-var showBackground = true
-var showStars = false
-var showGround = true
-var showHUD = false
-var showPlayer = true
-var showObstacles = false
-var showOverlay = false
-```
+Untuk state `gameOver`, overlay menampilkan:
 
-Gunakan:
+- Judul GAME OVER.
+- Skor terakhir.
+- High score.
+- Tombol `RESTART`.
 
-- `true` untuk mengaktifkan object
-- `false` untuk menonaktifkan object
+Saat state `playing`, overlay mengembalikan `EmptyView`.
 
-Saat ini project sengaja fokus pada player:
+## Asset
 
-- Stars nonaktif
-- HUD nonaktif
-- Obstacles nonaktif
-- Overlay nonaktif
-- Background, ground, dan player aktif
+Asset dipakai melalui nama image dalam kode SpriteKit. Beberapa nama yang digunakan:
 
-Beberapa pemanggilan yang nonaktif sudah diberi komentar di source code agar mudah dipelajari. Untuk mengaktifkannya lagi, ubah toggle menjadi `true` dan hapus komentar pemanggilannya jika diperlukan.
+- `dino`: sprite sheet player dengan 8 frame.
+- `Terrain`: sprite sheet tile ground.
+- `Clouds_01` sampai `Clouds_07`: variasi awan.
+- `sawit`, `sawit2`, `sawit3`, `sawit4`, `sawit5`: frame animasi obstacle.
 
-## Alur lengkap
+Jika mengganti asset, pertahankan nama image yang dipanggil kode atau perbarui pemanggilannya pada node terkait.
 
-```text
-App/App.swift
-  ↓
-App/MainView.swift
-  ↓
-SpriteView menampilkan DinoGameScene
-  ↓
-Game.swift menyiapkan scene
-  ↓
-Background.swift membuat background
-  ↓
-Player.swift membuat Dino
-  ↓
-Player diam di state ready
-  ↓
-Tekan "MULAI / LOMPAT"
-  ↓
-Flow.swift menjalankan startGame()
-  ↓
-Player.swift memutar animasi lari
-  ↓
-Game.swift menjalankan update()
-  ↓
-Obstacles.swift membuat rintangan jika diaktifkan
-  ↓
-Collision memanggil endGame()
-```
+## Perubahan umum
 
-## Perubahan sederhana
+### Mengubah tampilan background
 
-### Mengubah sprite player
+Edit `Configuration/GameViewTheme.swift`. Atur nilai warna `night`, `morning`, `day`, dan `evening`.
 
-Edit `Player.swift`.
+### Mengubah animasi player
 
-Asset berada di:
+Edit `Nodes/PlayerNode.swift`.
+
+- Jumlah frame diatur oleh `frameCount`.
+- Durasi tiap frame diatur pada `timePerFrame`.
+- Asset sprite sheet dibaca dengan nama `dino`.
+
+### Mengubah bentuk atau perilaku obstacle
+
+- Obstacle sprite: edit `Nodes/ObstacleNode.swift`.
+- Fireball: edit `Nodes/FireballNode.swift`.
+- Jadwal dan posisi spawn: edit `Scenes/DinoGameScene.swift`.
+
+### Mengubah gerakan ground atau gap
+
+Edit `Nodes/GroundNode.swift` untuk perilaku tile dan physics. Edit `Scenes/DinoGameScene.swift` untuk kapan gap dibuat dan berapa lama obstacle ditahan.
+
+### Mengubah overlay atau kontrol
+
+- Overlay awal dan game over: edit `UI/GameOverlay.swift`.
+- Scoreboard dan tombol lompat: edit `App/GameMainView.swift`.
+
+## Ringkasan arsitektur
 
 ```text
-Assets.xcassets/dino.imageset/dino.png
+SwiftUI
+├── GameMainView
+│   ├── ScoreBoard
+│   ├── JumpButton
+│   └── GameOverlay
+│
+└── SpriteKit
+    └── DinoGameScene
+        ├── PlayerNode
+        ├── GroundNode
+        ├── CloudNode
+        ├── ObstacleNode
+        └── FireballNode
+
+Configuration
+├── GameState
+├── PhysicsCategory
+└── GameViewTheme
 ```
 
-Sprite sheet memiliki 8 frame horizontal.
-
-### Mengubah kecepatan animasi player
-
-Edit `Game.swift`:
-
-```swift
-let playerRunDuration: TimeInterval = 0.12
-```
-
-Nilai lebih kecil membuat animasi lebih cepat.
-
-### Mengubah kekuatan lompatan
-
-Edit `Game.swift`:
-
-```swift
-let jumpPower: CGFloat = 720
-```
-
-### Mengubah warna atau bentuk background
-
-Edit `Background.swift`.
-
-### Mengubah bentuk rintangan
-
-Edit `Obstacles.swift`.
-
-### Mengubah teks tombol
-
-Edit `App/MainView.swift`.
-
-## Ringkasan
-
-```text
-App/
-  └── Menjalankan aplikasi dan menampilkan game
-
-Game/
-  ├── Game.swift
-  │     └── Pengatur utama
-  ├── Background.swift
-  │     └── Background, stars, dan ground
-  ├── Player.swift
-  │     └── Dino, texture, dan animasi
-  ├── HUD.swift
-  │     └── Score dan best score
-  ├── Overlay.swift
-  │     └── Panel informasi
-  ├── Flow.swift
-  │     └── Start, jump, dan game over
-  └── Obstacles.swift
-        └── Kaktus, burung, dan physics rintangan
-```
+Prinsip pembagian tanggung jawabnya sederhana: SwiftUI mengatur komposisi UI dan callback state, node mengatur bentuk serta perilaku objek SpriteKit individual, sedangkan `DinoGameScene` mengatur aturan permainan dan hubungan antarobjek.
